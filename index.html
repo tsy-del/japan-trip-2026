@@ -146,12 +146,53 @@
 
 <script>
     const SECRET_KEY = 'szy2026'; // 預設密鑰
+    const GITHUB_TOKEN = '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'; // 用於雲端同步
+    const DATA_REPO = 'tsy-del/japan-trip-2026';
+    
     let currentUser = localStorage.getItem('app_user');
     let chartInstance = null;
     let currentTripId = null;
-    let myTrips = JSON.parse(localStorage.getItem('my_trips')) || [
-        { id: 'osaka-2026', title: '2026 大阪夏季之旅', icon: '🇯🇵', status: '進行中', itinerary: '7月18日\n🛫 出發 & 飯店入住' }
-    ];
+    let myTrips = [];
+
+    async function syncFromCloud() {
+        try {
+            const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            const file = await resp.json();
+            const content = decodeURIComponent(escape(atob(file.content)));
+            myTrips = JSON.parse(content);
+            localStorage.setItem('my_trips', JSON.stringify(myTrips));
+            renderTripList();
+        } catch (e) {
+            console.error('Cloud sync failed, using local backup', e);
+            myTrips = JSON.parse(localStorage.getItem('my_trips')) || [];
+            renderTripList();
+        }
+    }
+
+    async function syncToCloud() {
+        try {
+            const getFileResp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            const file = await getFileResp.json();
+            const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2))));
+            
+            await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Update trips by ${currentUser}`,
+                    content: newContent,
+                    sha: file.sha
+                })
+            });
+            console.log('Cloud sync success');
+        } catch (e) {
+            console.error('Cloud upload failed', e);
+        }
+    }
 
     function handleLogin() {
         const name = document.getElementById('user-name').value;
@@ -162,7 +203,7 @@
             document.getElementById('view-login').style.display = 'none';
             document.getElementById('view-home').classList.add('active');
             document.getElementById('display-user').innerText = name + ' ⇥';
-            renderTripList();
+            syncFromCloud();
         } else {
             alert('密鑰錯誤或名字未填！');
         }
@@ -175,17 +216,20 @@
         }
     }
 
-    // 初始化登入狀態
     if (currentUser) {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-home').classList.add('active');
         document.getElementById('display-user').innerText = currentUser + ' ⇥';
-        renderTripList();
+        syncFromCloud();
     }
 
     function renderTripList() {
         const listContainer = document.getElementById('trip-list');
         listContainer.innerHTML = '';
+        if (myTrips.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">正在從雲端同步行程...</p>';
+            return;
+        }
         myTrips.forEach(trip => {
             const card = document.createElement('div');
             card.className = 'trip-card';
@@ -257,7 +301,9 @@
         if (idx > -1) {
             myTrips[idx].itinerary = content;
             localStorage.setItem('my_trips', JSON.stringify(myTrips));
-            displayItinerary(content); toggleEditItinerary();
+            displayItinerary(content); 
+            toggleEditItinerary();
+            syncToCloud();
         }
     }
 
