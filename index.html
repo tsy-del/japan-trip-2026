@@ -3,84 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SzeYuen's Travel Dashboard</title>
+    <title>Japan 2026 | SzeYuen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #5d2d91; }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #5d2d91; }
-        .flight-info { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
-        .price-tag { font-size: 1.5em; font-weight: bold; color: #e91e63; }
-        .chart-container { position: relative; height: 300px; width: 100%; }
-        .tag { background: #5d2d91; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
-        .loading { text-align: center; color: #888; padding: 20px; }
+        :root {
+            --primary: #5d2d91;
+            --secondary: #e91e63;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #1c1e21;
+        }
+        body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 70px; color: var(--text); }
         
-        /* Itinerary Styles */
-        .day-item { margin-bottom: 20px; border-left: 3px solid #5d2d91; padding-left: 15px; }
-        .day-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-        .day-title { font-weight: bold; color: #5d2d91; font-size: 1.1em; }
-        .day-summary { font-size: 0.9em; color: #666; font-style: italic; }
-        ul { margin: 5px 0; padding-left: 20px; }
-        li { margin-bottom: 5px; font-size: 0.95em; }
+        /* App Header */
+        header { background: var(--primary); color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 1.2em; }
+
+        /* Navigation Bar */
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        nav button { background: none; border: none; color: #888; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1; }
+        nav button.active { color: var(--primary); font-weight: bold; }
+        nav button .icon { font-size: 1.5em; margin-bottom: 4px; }
+
+        /* Container & Tabs */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card { background: var(--card-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card h2 { margin-top: 0; font-size: 1em; color: var(--primary); border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; }
+
+        /* Flight UI */
+        .flight-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .flight-main { flex: 1; }
+        .flight-code { font-size: 0.7em; background: #eee; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+        .price { font-weight: bold; color: var(--secondary); font-size: 1.2em; }
+
+        /* Timeline UI */
+        .timeline { position: relative; padding-left: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #ddd; }
+        .day { position: relative; margin-bottom: 25px; }
+        .day::before { content: ''; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); border: 2px solid white; }
+        .day-date { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; color: var(--primary); }
+        .day-details { font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+
+        /* Chart */
+        .chart-container { height: 250px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🇯🇵 Osaka 2026 Summer</h1>
-        
+
+<header>
+    <h1>🇯🇵 Osaka Summer 2026</h1>
+</header>
+
+<div class="container">
+    <!-- Tab 1: Overview -->
+    <div id="tab-overview" class="tab-content active">
         <div class="card">
             <h2>Flight Tracking</h2>
-            <div class="flight-info">
-                <div>
-                    <strong>HKG ➔ KIX</strong> (18 Jul)<br>
-                    <span class="tag">UO686</span> 08:45 - 13:30
+            <div class="flight-row">
+                <div class="flight-main">
+                    <strong>HKG ➔ KIX</strong> <span class="flight-code">UO686</span><br>
+                    <small>18 Jul (Sat) · 08:45</small>
                 </div>
-                <div class="price-tag" id="dep-price">--</div>
+                <div class="price" id="dep-price">--</div>
             </div>
-            <div class="flight-info">
-                <div>
-                    <strong>KIX ➔ HKG</strong> (26 Jul)<br>
-                    <span class="tag">UO899</span> 17:00 - 20:10
+            <div class="flight-row">
+                <div class="flight-main">
+                    <strong>KIX ➔ HKG</strong> <span class="flight-code">UO899</span><br>
+                    <small>26 Jul (Sun) · 17:00</small>
                 </div>
-                <div class="price-tag" id="ret-price">--</div>
+                <div class="price" id="ret-price">--</div>
             </div>
-            <p style="text-align: right; color: #888; font-size: 0.8em;">Latest Total: <span id="total-price">--</span></p>
-        </div>
-
-        <div class="card">
-            <h2>Itinerary Plan</h2>
-            <div id="itinerary-list">
-                <!-- Day 1 -->
-                <div class="day-item">
-                    <div class="day-header">
-                        <span class="day-title">Day 1: 18 Jul (Sat)</span>
-                        <span class="day-summary">Arrival & Osaka</span>
-                    </div>
-                    <ul>
-                        <li>Flight UO686 (08:45 - 13:30)</li>
-                        <li>Check-in at Hotel</li>
-                        <li>Dinner at Dotonbori / Shinsaibashi</li>
-                    </ul>
-                </div>
-
-                <!-- Days in between -->
-                <div class="day-item" style="border-left: 2px dashed #ccc; padding-left: 15px; color: #888; margin: 10px 0;">
-                    <em>... Planning in progress ...</em>
-                </div>
-
-                <!-- Last Day -->
-                <div class="day-item">
-                    <div class="day-header">
-                        <span class="day-title">Day 9: 26 Jul (Sun)</span>
-                        <span class="day-summary">Final Shopping & Departure</span>
-                    </div>
-                    <ul>
-                        <li>Last minute shopping at Rinku Town Outlet</li>
-                        <li>Flight UO899 (17:00 - 20:10)</li>
-                    </ul>
-                </div>
+            <div style="text-align: right; border-top: 1px solid #eee; padding-top: 10px;">
+                <small>Est. Total:</small> <span id="total-price" style="font-weight: bold;">--</span>
             </div>
         </div>
 
@@ -90,52 +89,108 @@
                 <canvas id="priceChart"></canvas>
             </div>
         </div>
+    </div>
 
+    <!-- Tab 2: Itinerary -->
+    <div id="tab-itinerary" class="tab-content">
         <div class="card">
-            <h2>Itinerary Notes</h2>
-            <ul id="itinerary">
-                <li>Current Focus: Price monitoring for HK Express.</li>
-                <li>Data updates daily at 9:00 AM & 9:00 PM.</li>
-            </ul>
+            <h2>Timeline</h2>
+            <div class="timeline">
+                <div class="day">
+                    <div class="day-date">Day 1: 18 Jul (Sat)</div>
+                    <div class="day-details">
+                        🛫 Flight to Osaka<br>
+                        🏨 Check-in Hotel<br>
+                        🍜 Dotonbori Dinner
+                    </div>
+                </div>
+                <div class="day">
+                    <div class="day-date">Day 2-8: 19-25 Jul</div>
+                    <div class="day-details" style="color:#999; font-style: italic;">
+                        Exploring Japan...
+                    </div>
+                </div>
+                <div class="day">
+                    <div class="day-date">Day 9: 26 Jul (Sun)</div>
+                    <div class="day-details">
+                        🛍️ Rinku Town Outlet<br>
+                        🛬 Flight to HK
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        async function loadData() {
-            try {
-                const response = await fetch('data.json?t=' + new Date().getTime());
-                const data = await response.json();
-                
-                const latest = data[data.length - 1];
-                document.getElementById('dep-price').innerText = 'HK$ ' + latest.uo686.toLocaleString();
-                document.getElementById('ret-price').innerText = 'HK$ ' + latest.uo899.toLocaleString();
-                document.getElementById('total-price').innerText = 'HK$ ' + latest.total.toLocaleString();
+    <!-- Tab 3: Budget -->
+    <div id="tab-budget" class="tab-content">
+        <div class="card">
+            <h2>Expenses Tracker</h2>
+            <p style="text-align: center; color: #999; padding: 20px;">Coming Soon...</p>
+        </div>
+    </div>
+</div>
 
-                const ctx = document.getElementById('priceChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.map(d => d.date),
-                        datasets: [{
-                            label: 'Total Price (HKD)',
-                            data: data.map(d => d.total),
-                            borderColor: '#5d2d91',
-                            backgroundColor: 'rgba(93, 45, 145, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { y: { beginAtZero: false } }
-                    }
-                });
-            } catch (e) {
-                console.error('Failed to load data', e);
-            }
-        }
-        loadData();
-    </script>
+<nav>
+    <button onclick="switchTab('overview')" id="nav-overview" class="active">
+        <span class="icon">📊</span>
+        <span>Overview</span>
+    </button>
+    <button onclick="switchTab('itinerary')" id="nav-itinerary">
+        <span class="icon">🗺️</span>
+        <span>Itinerary</span>
+    </button>
+    <button onclick="switchTab('budget')" id="nav-budget">
+        <span class="icon">💰</span>
+        <span>Budget</span>
+    </button>
+</nav>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabId).classList.add('active');
+        document.getElementById('nav-' + tabId).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    async function loadData() {
+        try {
+            const response = await fetch('data.json?t=' + new Date().getTime());
+            const data = await response.json();
+            const latest = data[data.length - 1];
+            
+            document.getElementById('dep-price').innerText = 'HK$ ' + latest.uo686;
+            document.getElementById('ret-price').innerText = 'HK$ ' + latest.uo899;
+            document.getElementById('total-price').innerText = 'HK$ ' + latest.total;
+
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date.split(' ')[0]),
+                    datasets: [{
+                        label: 'Price (HKD)',
+                        data: data.map(d => d.total),
+                        borderColor: '#5d2d91',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        backgroundColor: 'rgba(93, 45, 145, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: false, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+                }
+            });
+        } catch (e) { console.error(e); }
+    }
+    loadData();
+</script>
 </body>
 </html>
