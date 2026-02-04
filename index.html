@@ -134,7 +134,11 @@
         <div class="form-row"><label>航班編號</label><input type="text" id="flight-no"></div>
         <div class="form-row"><label>飛行時間</label><input type="text" id="flight-duration"></div>
     </div>
-    <div class="modal-footer"><button style="background:#eee;" onclick="closeItemModal()">取消</button><button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button></div>
+    <div class="modal-footer">
+        <button style="background:#eee;" onclick="closeItemModal()">取消</button>
+        <button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button>
+    </div>
+    <button id="delete-item-btn" style="display:none; width:100%; background:#ff5252; color:white; border:none; padding:12px; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;" onclick="deleteItem()">🗑️ 刪除此行程</button>
 </div></div>
 
 <script>
@@ -281,7 +285,7 @@
         let h = '';
         items.forEach((item) => {
             const dur = item.endTime ? calculateDuration(item.time, item.endTime) : '';
-            h += `<div class="item-wrapper">
+            h += `<div class="item-wrapper" onclick="editItem(${item.id})">
                     <div class="item-card">
                         <div class="item-left">
                             <div class="item-time-top">${item.time}</div>
@@ -293,7 +297,7 @@
                             <div class="item-subtitle">${item.subtitle || ''}</div>
                             <small class="item-location-text">${item.location || ''}</small>
                             <div class="item-footer">
-                                ${item.location ? `<div class="badge badge-map" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}')">🗺️ 地圖</div>` : ''}
+                                ${item.location ? `<div class="badge badge-map" onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}')">🗺️ 地圖</div>` : ''}
                                 ${item.remark ? `<div class="badge">📝 備註</div>` : ''}
                             </div>
                         </div>
@@ -315,18 +319,77 @@
     }
     
     let isFlightMode = false;
+    let editingItemId = null;
+
     function toggleFlightMode() {
+        if (editingItemId) return; // 編輯模式下禁止切換
         isFlightMode = !isFlightMode;
         document.getElementById('normal-fields').style.display = isFlightMode ? 'none' : 'block';
         document.getElementById('flight-fields').style.display = isFlightMode ? 'block' : 'none';
         document.getElementById('flight-mode-btn').innerText = isFlightMode ? '📝 普通模式' : '✈️ 航班模式';
     }
 
-    function openItemModal() { document.getElementById('item-modal').classList.add('active'); }
-    function closeItemModal() { document.getElementById('item-modal').classList.remove('active'); }
+    function openItemModal() { 
+        editingItemId = null;
+        document.getElementById('item-modal-title').innerText = '新增活動';
+        document.getElementById('delete-item-btn').style.display = 'none';
+        document.getElementById('flight-mode-btn').style.display = 'block';
+        document.getElementById('item-modal').classList.add('active'); 
+    }
+
+    function editItem(itemId) {
+        editingItemId = itemId;
+        const trip = myTrips.find(x => x.id === currentTripId);
+        const item = trip.items.find(x => x.id === itemId);
+        
+        document.getElementById('item-modal-title').innerText = '修改活動';
+        document.getElementById('item-time').value = item.time;
+        document.getElementById('item-time-end').value = item.endTime || '';
+        document.getElementById('item-name').value = item.name;
+        document.getElementById('item-sub').value = item.subtitle || '';
+        document.getElementById('item-location').value = item.location || '';
+        document.getElementById('item-remark').value = item.remark || '';
+        
+        document.getElementById('normal-fields').style.display = 'block';
+        document.getElementById('flight-fields').style.display = 'none';
+        document.getElementById('flight-mode-btn').style.display = 'none';
+        document.getElementById('delete-item-btn').style.display = 'block';
+        
+        document.getElementById('item-modal').classList.add('active');
+    }
+
+    function deleteItem() {
+        if (!confirm('確定要刪除這個行程嗎？')) return;
+        const trip = myTrips.find(x => x.id === currentTripId);
+        trip.items = trip.items.filter(x => x.id !== editingItemId);
+        syncToCloud(); renderItinerary(); closeItemModal();
+    }
+
+    function closeItemModal() { 
+        document.getElementById('item-modal').classList.remove('active'); 
+        // 重設 Form
+        document.getElementById('item-name').value = ''; 
+        document.getElementById('item-sub').value = ''; 
+        document.getElementById('item-location').value = '';
+        document.getElementById('item-remark').value = '';
+    }
+
     function saveItem() {
         const trip = myTrips.find(x=>x.id===currentTripId); if(!trip.items) trip.items = [];
-        if (isFlightMode) {
+        
+        if (editingItemId) {
+            const idx = trip.items.findIndex(x => x.id === editingItemId);
+            trip.items[idx] = {
+                ...trip.items[idx],
+                time: document.getElementById('item-time').value,
+                endTime: document.getElementById('item-time-end').value,
+                name: document.getElementById('item-name').value,
+                subtitle: document.getElementById('item-sub').value,
+                location: document.getElementById('item-location').value,
+                remark: document.getElementById('item-remark').value
+            };
+        } else if (isFlightMode) {
+            // ... (原本的航班模式 logic)
             const fTime = document.getElementById('flight-time').value;
             const airline = document.getElementById('flight-airline').value;
             const fNo = document.getElementById('flight-no').value;
@@ -341,7 +404,6 @@
             trip.items.push({ id:Date.now(), day:currentDay, time:document.getElementById('item-time').value, endTime:document.getElementById('item-time-end').value, name:document.getElementById('item-name').value, subtitle:document.getElementById('item-sub').value, location:document.getElementById('item-location').value, remark:document.getElementById('item-remark').value });
         }
         syncToCloud(); renderItinerary(); closeItemModal();
-        document.getElementById('item-name').value = ''; document.getElementById('item-sub').value = ''; document.getElementById('item-location').value = '';
     }
     function showHome() { location.reload(); }
 </script>
