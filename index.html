@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Japan 2026 | SzeYuen</title>
+    <title>2026 日本夏季之旅 | SzeYuen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,15 +13,15 @@
             --card-bg: #ffffff;
             --text: #1c1e21;
         }
-        body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 70px; color: var(--text); }
+        body { font-family: -apple-system, "PingFang HK", "Helvetica Neue", sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 70px; color: var(--text); }
         
         /* App Header */
         header { background: var(--primary); color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        header h1 { margin: 0; font-size: 1.2em; }
+        header h1 { margin: 0; font-size: 1.2em; letter-spacing: 1px; }
 
         /* Navigation Bar */
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
-        nav button { background: none; border: none; color: #888; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1; }
+        nav button { background: none; border: none; color: #888; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1; outline: none; }
         nav button.active { color: var(--primary); font-weight: bold; }
         nav button .icon { font-size: 1.5em; margin-bottom: 4px; }
 
@@ -38,16 +38,17 @@
         /* Flight UI */
         .flight-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .flight-main { flex: 1; }
-        .flight-code { font-size: 0.7em; background: #eee; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+        .flight-code { font-size: 0.7em; background: #eee; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 5px; }
         .price { font-weight: bold; color: var(--secondary); font-size: 1.2em; }
+        .flight-time { color: #666; font-size: 0.9em; margin-top: 3px; }
 
         /* Timeline UI */
         .timeline { position: relative; padding-left: 20px; }
         .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #ddd; }
         .day { position: relative; margin-bottom: 25px; }
         .day::before { content: ''; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); border: 2px solid white; }
-        .day-date { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; color: var(--primary); }
-        .day-details { font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+        .day-date { font-weight: bold; font-size: 0.95em; margin-bottom: 5px; color: var(--primary); }
+        .day-details { font-size: 0.9em; background: #f9f9f9; padding: 12px; border-radius: 10px; line-height: 1.6; }
 
         /* Chart */
         .chart-container { height: 250px; }
@@ -56,76 +57,76 @@
 <body>
 
 <header>
-    <h1>🇯🇵 Osaka Summer 2026</h1>
+    <h1>🇯🇵 2026 大阪夏季之旅</h1>
 </header>
 
 <div class="container">
-    <!-- Tab 1: Overview -->
+    <!-- Tab 1: Overview (概覽) -->
     <div id="tab-overview" class="tab-content active">
         <div class="card">
-            <h2>Flight Tracking</h2>
+            <h2>✈️ 航班追蹤</h2>
             <div class="flight-row">
                 <div class="flight-main">
-                    <strong>HKG ➔ KIX</strong> <span class="flight-code">UO686</span><br>
-                    <small>18 Jul (Sat) · 08:45</small>
+                    <strong>香港 (HKG) ➔ 大阪 (KIX)</strong> <span class="flight-code">UO686</span><br>
+                    <div class="flight-time">7月18日 (六) · 08:45</div>
                 </div>
                 <div class="price" id="dep-price">--</div>
             </div>
             <div class="flight-row">
                 <div class="flight-main">
-                    <strong>KIX ➔ HKG</strong> <span class="flight-code">UO899</span><br>
-                    <small>26 Jul (Sun) · 17:00</small>
+                    <strong>大阪 (KIX) ➔ 香港 (HKG)</strong> <span class="flight-code">UO899</span><br>
+                    <div class="flight-time">7月26日 (日) · 17:00</div>
                 </div>
                 <div class="price" id="ret-price">--</div>
             </div>
-            <div style="text-align: right; border-top: 1px solid #eee; padding-top: 10px;">
-                <small>Est. Total:</small> <span id="total-price" style="font-weight: bold;">--</span>
+            <div style="text-align: right; border-top: 1px solid #eee; padding-top: 10px; color: #666;">
+                <small>目前總票價：</small> <span id="total-price" style="font-weight: bold; color: var(--text);">--</span>
             </div>
         </div>
 
         <div class="card">
-            <h2>Price Trend</h2>
+            <h2>📈 票價走勢</h2>
             <div class="chart-container">
                 <canvas id="priceChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Tab 2: Itinerary -->
+    <!-- Tab 2: Itinerary (行程) -->
     <div id="tab-itinerary" class="tab-content">
         <div class="card">
-            <h2>Timeline</h2>
+            <h2>🗺️ 行程規劃</h2>
             <div class="timeline">
                 <div class="day">
-                    <div class="day-date">Day 1: 18 Jul (Sat)</div>
+                    <div class="day-date">第 1 日：7月18日 (六)</div>
                     <div class="day-details">
-                        🛫 Flight to Osaka<br>
-                        🏨 Check-in Hotel<br>
-                        🍜 Dotonbori Dinner
+                        🛫 乘搭航班前往大阪<br>
+                        🏨 酒店辦理入住手續<br>
+                        🍜 道頓堀 / 心齋橋晚餐
                     </div>
                 </div>
                 <div class="day">
-                    <div class="day-date">Day 2-8: 19-25 Jul</div>
+                    <div class="day-date">第 2-8 日：7月19-25日</div>
                     <div class="day-details" style="color:#999; font-style: italic;">
-                        Exploring Japan...
+                        行程規劃中...
                     </div>
                 </div>
                 <div class="day">
-                    <div class="day-date">Day 9: 26 Jul (Sun)</div>
+                    <div class="day-date">第 9 日：7月26日 (日)</div>
                     <div class="day-details">
-                        🛍️ Rinku Town Outlet<br>
-                        🛬 Flight to HK
+                        🛍️ Rinku Town Outlet 最後衝刺<br>
+                        🛬 乘搭航班返回香港
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tab 3: Budget -->
+    <!-- Tab 3: Budget (預算) -->
     <div id="tab-budget" class="tab-content">
         <div class="card">
-            <h2>Expenses Tracker</h2>
-            <p style="text-align: center; color: #999; padding: 20px;">Coming Soon...</p>
+            <h2>💰 開支記錄</h2>
+            <p style="text-align: center; color: #999; padding: 20px;">即將推出...</p>
         </div>
     </div>
 </div>
@@ -133,15 +134,15 @@
 <nav>
     <button onclick="switchTab('overview')" id="nav-overview" class="active">
         <span class="icon">📊</span>
-        <span>Overview</span>
+        <span>概覽</span>
     </button>
     <button onclick="switchTab('itinerary')" id="nav-itinerary">
         <span class="icon">🗺️</span>
-        <span>Itinerary</span>
+        <span>行程</span>
     </button>
     <button onclick="switchTab('budget')" id="nav-budget">
         <span class="icon">💰</span>
-        <span>Budget</span>
+        <span>預算</span>
     </button>
 </nav>
 
@@ -161,9 +162,9 @@
             const data = await response.json();
             const latest = data[data.length - 1];
             
-            document.getElementById('dep-price').innerText = 'HK$ ' + latest.uo686;
-            document.getElementById('ret-price').innerText = 'HK$ ' + latest.uo899;
-            document.getElementById('total-price').innerText = 'HK$ ' + latest.total;
+            document.getElementById('dep-price').innerText = 'HK$ ' + latest.uo686.toLocaleString();
+            document.getElementById('ret-price').innerText = 'HK$ ' + latest.uo899.toLocaleString();
+            document.getElementById('total-price').innerText = 'HK$ ' + latest.total.toLocaleString();
 
             const ctx = document.getElementById('priceChart').getContext('2d');
             new Chart(ctx, {
@@ -171,7 +172,7 @@
                 data: {
                     labels: data.map(d => d.date.split(' ')[0]),
                     datasets: [{
-                        label: 'Price (HKD)',
+                        label: '總票價 (HKD)',
                         data: data.map(d => d.total),
                         borderColor: '#5d2d91',
                         borderWidth: 2,
