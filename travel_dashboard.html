@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SzeYuen's Travel Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #5d2d91; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #5d2d91; }
+        .flight-info { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
+        .price-tag { font-size: 1.5em; font-weight: bold; color: #e91e63; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .tag { background: #5d2d91; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇯🇵 Osaka 2026 Summer</h1>
+        
+        <div class="card">
+            <h2>Flight Tracking</h2>
+            <div class="flight-info">
+                <div>
+                    <strong>HKG ➔ KIX</strong> (18 Jul)<br>
+                    <span class="tag">UO686</span> 08:45 - 13:30
+                </div>
+                <div class="price-tag" id="dep-price">HK$ 1,060</div>
+            </div>
+            <div class="flight-info">
+                <div>
+                    <strong>KIX ➔ HKG</strong> (26 Jul)<br>
+                    <span class="tag">UO899</span> 17:00 - 20:10
+                </div>
+                <div class="price-tag" id="ret-price">HK$ 1,240</div>
+            </div>
+            <p style="text-align: right; color: #888; font-size: 0.8em;">Total (Inc. Tax): HK$ 3,179</p>
+        </div>
+
+        <div class="card">
+            <h2>Price Trend</h2>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Itinerary Notes</h2>
+            <ul>
+                <li>Current Focus: Price monitoring for HK Express.</li>
+                <li>Next Step: Compare with ANA/Cathay if UO prices rise.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Feb 4 (Init)'],
+                datasets: [{
+                    label: 'Total Flight Price (HKD)',
+                    data: [3179],
+                    borderColor: '#5d2d91',
+                    backgroundColor: 'rgba(93, 45, 145, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    </script>
+</body>
+</html>
