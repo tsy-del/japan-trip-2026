@@ -47,7 +47,10 @@
         "time": "08:25",
         "name": "✈️ 大灣區航空 HB702",
         "remark": "預計飛行時間: 1h45",
-        "budget": 0
+        "budget": 0,
+        "endTime": "",
+        "subtitle": "",
+        "location": "香港國際機場"
       },
       {
         "id": 1770190386563,
