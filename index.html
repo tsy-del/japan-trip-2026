@@ -6,64 +6,73 @@
     <title>我的旅行隨身 App | SzeYuen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --primary: #5d2d91;
-            --secondary: #e91e63;
-            --bg: #f0f2f5;
-            --card-bg: #ffffff;
-            --text: #1c1e21;
-        }
+        :root { --primary: #5d2d91; --secondary: #e91e63; --bg: #f4f6f9; --card-bg: #ffffff; --text: #1c1e21; }
         body { font-family: -apple-system, "PingFang HK", sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 70px; color: var(--text); }
         
         #view-login { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); color: white; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; text-align: center; }
-        #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; font-size: 1.1em; text-align: center; }
-        #view-login button { background: var(--secondary); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
+        #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; text-align: center; }
+        #view-login button { background: var(--secondary); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; }
 
         header { background: var(--primary); color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
-        header h1 { margin: 0; font-size: 1.2em; }
         .user-tag { position: absolute; right: 15px; top: 22px; font-size: 0.7em; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; }
+        .back-btn { background: none; border: none; color: white; position: absolute; left: 15px; top: 20px; font-size: 1.2em; }
 
         .container { padding: 15px; max-width: 600px; margin: 0 auto; }
         
+        /* Home List */
         #view-home { display: none; }
         #view-home.active { display: block; }
-        .trip-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .trip-icon { font-size: 2em; margin-right: 15px; }
-        .trip-info { flex: 1; }
-        .trip-title { font-weight: bold; }
+        .trip-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        .add-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 15px; border-radius: 15px; font-weight: bold; margin-top: 10px; }
-
+        /* Detail View */
         #view-detail { display: none; }
         #view-detail.active { display: block; }
-        .back-btn { background: none; border: none; color: white; position: absolute; left: 15px; top: 20px; font-size: 1.2em; }
+
+        /* Day Tabs (Horizontal Scroll) */
+        .day-tabs { display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
+        .day-tabs::-webkit-scrollbar { display: none; }
+        .day-tab { padding: 8px 20px; background: white; border-radius: 20px; margin-right: 10px; font-size: 0.9em; border: 1px solid #ddd; flex-shrink: 0; }
+        .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+
+        /* Itinerary Item Card */
+        .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .item-time { color: var(--primary); font-weight: bold; font-size: 0.9em; width: 45px; }
+        .item-main { flex: 1; }
+        .item-title { font-weight: bold; font-size: 1.05em; margin-bottom: 4px; }
+        .item-remark { font-size: 0.85em; color: #777; margin-bottom: 8px; }
+        .item-meta { display: flex; gap: 10px; }
+        .badge { font-size: 0.75em; padding: 2px 8px; border-radius: 4px; }
+        .badge-price { background: #fff3e0; color: #ff9800; border: 1px solid #ffe0b2; }
+        .badge-map { background: #e3f2fd; color: #2196f3; border: 1px solid #bbdefb; cursor: pointer; }
+
+        /* Floating Add Button */
+        .fab { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 900; border: none; }
+
+        /* Editor Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: flex-end; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-content h3 { margin-top: 0; font-size: 1.1em; color: var(--primary); }
+        .form-row { margin-bottom: 15px; }
+        .form-row label { display: block; font-size: 0.85em; color: #666; margin-bottom: 5px; }
+        .form-row input, .form-row textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; }
+        .modal-footer { display: flex; gap: 10px; }
+        .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
 
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: none; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
         nav.active { display: flex; }
         nav button { background: none; border: none; color: #888; font-size: 0.8em; flex: 1; }
         nav button.active { color: var(--primary); font-weight: bold; }
-
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* 行程卡片樣式 */
-        .timeline { position: relative; padding-left: 20px; border-left: 2px solid #eee; margin-left: 10px; }
-        .day-block { margin-bottom: 30px; }
-        .day-label { font-weight: bold; color: var(--primary); margin-bottom: 10px; position: relative; }
-        .day-label::before { content: ''; position: absolute; left: -26px; top: 6px; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; border: 2px solid white; }
-        .item-card { background: #f8f9fa; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; }
-        .item-text { font-size: 0.95em; color: #333; }
-        .map-btn { background: white; border: 1px solid #ddd; padding: 5px 10px; border-radius: 8px; font-size: 0.8em; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div id="view-login">
-    <div style="font-size: 4em; margin-bottom: 20px;">✈️</div>
-    <h2 style="margin-bottom: 30px;">旅行隨身 App</h2>
+    <div style="font-size: 3em; margin-bottom: 10px;">✈️</div>
+    <h2 style="margin-bottom: 20px;">旅行隨身 App</h2>
     <input type="text" id="user-name" placeholder="你的名字">
-    <input type="password" id="access-key" placeholder="輸入 Token">
+    <input type="password" id="access-key" placeholder="GitHub Token">
     <button onclick="handleLogin()">登入並同步</button>
 </div>
 
@@ -76,27 +85,56 @@
 <div class="container">
     <div id="view-home">
         <div id="trip-list"></div>
-        <button class="add-btn" onclick="openModal()">➕ 新增旅行行程</button>
+        <button style="width:100%; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:10px;" onclick="openTripModal()">➕ 新增旅行</button>
     </div>
 
     <div id="view-detail">
+        <!-- Overview Tab -->
         <div id="tab-overview" class="tab-content active">
-            <div class="card"><h2>✈️ 航班追蹤</h2><div id="flight-container">載入中...</div></div>
-            <div class="card"><h2>📈 票價走勢</h2><div style="height:200px"><canvas id="priceChart"></canvas></div></div>
+            <div class="card"><h3>✈️ 航班追蹤</h3><div id="flight-container">載入中...</div></div>
+            <div class="card"><h3>📈 票價走勢</h3><div style="height:200px"><canvas id="priceChart"></canvas></div></div>
         </div>
+
+        <!-- Itinerary Tab -->
         <div id="tab-itinerary" class="tab-content">
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin:0;">🗺️ 行程規劃</h2>
-                    <div id="total-budget-tag" style="font-size: 0.8em; background: #fff3e0; color: #ff9800; padding: 4px 10px; border-radius: 20px; font-weight: bold; border: 1px solid #ffe0b2;">總預算: --</div>
-                    <button id="edit-btn" onclick="toggleEditItinerary()" style="background:var(--primary); color:white; border:none; padding:5px 12px; border-radius:8px;">編輯</button>
-                </div>
-                <div id="itinerary-display" class="timeline"></div>
-                <div id="itinerary-edit" style="display: none;">
-                    <textarea id="itinerary-input" style="width: 100%; height: 300px; padding: 10px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;"></textarea>
-                    <button onclick="saveItinerary()" style="width:100%; background:var(--primary); color:white; border:none; padding:12px; border-radius:10px; margin-top:10px;">儲存行程</button>
-                </div>
+            <div class="day-tabs" id="day-tabs">
+                <!-- Day 1, Day 2... -->
             </div>
+            <div id="itinerary-list">
+                <!-- Items for selected day -->
+            </div>
+            <button class="fab" onclick="openItemModal()">+</button>
+        </div>
+    </div>
+</div>
+
+<!-- Item Editor Modal -->
+<div id="item-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-title">新增活動</h3>
+        <div class="form-row">
+            <label>時間</label>
+            <input type="time" id="item-time" value="09:00">
+        </div>
+        <div class="form-row">
+            <label>活動名稱</label>
+            <input type="text" id="item-name" placeholder="例如：築地市場食早餐">
+        </div>
+        <div class="form-row">
+            <label>地點 (用於地圖導航)</label>
+            <input type="text" id="item-location" placeholder="例如：Tsukiji Outer Market">
+        </div>
+        <div class="form-row">
+            <label>備註</label>
+            <textarea id="item-remark" rows="2" placeholder="備註或注意事項"></textarea>
+        </div>
+        <div class="form-row">
+            <label>預算 (HKD/JPY)</label>
+            <input type="number" id="item-budget" placeholder="0">
+        </div>
+        <div class="modal-footer">
+            <button style="background:#eee;" onclick="closeItemModal()">取消</button>
+            <button style="background:var(--primary); color:white;" onclick="saveItem()">儲存</button>
         </div>
     </div>
 </div>
@@ -112,6 +150,7 @@
     let currentUser = localStorage.getItem('app_user');
     let myTrips = [];
     let currentTripId = null;
+    let currentDay = 1;
     let chartInstance = null;
 
     function handleLogin() {
@@ -124,7 +163,7 @@
         }
     }
 
-    function handleLogout() { if(confirm('確定要登出嗎？')) { localStorage.clear(); location.reload(); } }
+    function handleLogout() { if(confirm('登出？')) { localStorage.clear(); location.reload(); } }
 
     if (currentUser && GITHUB_TOKEN) {
         document.getElementById('view-login').style.display = 'none';
@@ -135,27 +174,31 @@
 
     async function syncFromCloud() {
         try {
-            const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json?t=${Date.now()}`, {
+            const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json?t=${Date.now()}`, {
                 headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
             });
             const file = await resp.json();
             myTrips = JSON.parse(decodeURIComponent(escape(atob(file.content))));
             renderTripList();
-        } catch (e) { alert('同步失敗，請檢查 Token'); handleLogout(); }
+        } catch (e) {
+            // If v2 not found, try to migrate from old data or start fresh
+            myTrips = [{ id: 'osaka-2026', title: '2026 大阪夏季之旅', icon: '🇯🇵', status: '進行中', items: [] }];
+            renderTripList();
+        }
     }
 
     async function syncToCloud() {
-        const getFile = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+        const getFile = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
         const file = await getFile.json();
-        await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips.json`, {
+        await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, {
             method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
-            body: JSON.stringify({ message: 'Update', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file.sha })
+            body: JSON.stringify({ message: 'Sync V2', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file ? file.sha : null })
         });
     }
 
     function renderTripList() {
         const list = document.getElementById('trip-list');
-        list.innerHTML = myTrips.map(t => `<div class="trip-card" onclick="showTrip('${t.id}')"><div class="trip-icon">${t.icon}</div><div class="trip-info"><div class="trip-title">${t.title}</div><span style="font-size:0.8em;color:#999">${t.status}</span></div><div>❯</div></div>`).join('');
+        list.innerHTML = myTrips.map(t => `<div class="trip-card" onclick="showTrip('${t.id}')"><div style="font-size:2em;margin-right:15px;">${t.icon}</div><div><div style="font-weight:bold;">${t.title}</div><small style="color:#999;">${t.status}</small></div></div>`).join('');
     }
 
     function showTrip(tripId) {
@@ -166,83 +209,82 @@
         document.getElementById('app-nav').classList.add('active');
         document.getElementById('btn-back').style.display = 'block';
         document.getElementById('header-title').innerText = trip.title;
-        displayItinerary(trip.itinerary);
+        renderDayTabs();
+        renderItinerary();
         if(tripId === 'osaka-2026') loadOsakaData();
     }
 
-    function displayItinerary(content) {
-        const display = document.getElementById('itinerary-display');
-        const lines = content.split('\n');
+    function renderDayTabs() {
+        const tabs = document.getElementById('day-tabs');
+        // Let's assume 9 days for now, can be dynamic
         let html = '';
-        let totalBudget = 0;
-        let dayBudget = 0;
-        let dayBlocks = [];
+        for(let i=1; i<=9; i++) {
+            html += `<div class="day-tab ${i === currentDay ? 'active' : ''}" onclick="selectDay(${i})">第 ${i} 天</div>`;
+        }
+        tabs.innerHTML = html;
+    }
 
-        lines.forEach(line => {
-            if (!line.trim()) return;
-            
-            // 提取金額 [數字]
-            const moneyMatch = line.match(/\[(\d+)\]/);
-            const amount = moneyMatch ? parseInt(moneyMatch[1]) : 0;
-            totalBudget += amount;
+    function selectDay(day) {
+        currentDay = day;
+        renderDayTabs();
+        renderItinerary();
+    }
 
-            if (line.match(/日|Day/)) {
-                if (dayBlocks.length > 0) {
-                    // 更新前一天的預算小計
-                    let lastBlock = dayBlocks[dayBlocks.length - 1];
-                    lastBlock.html = lastBlock.html.replace('{{DAY_BUDGET}}', dayBudget > 0 ? ` (預算: ${dayBudget.toLocaleString()})` : '');
-                }
-                dayBudget = amount;
-                dayBlocks.push({
-                    title: line,
-                    html: `<div class="day-block"><div class="day-label">${line}<span style="font-size:0.8em; font-weight:normal; color:#ff9800;">{{DAY_BUDGET}}</span></div>`,
-                    items: []
-                });
-            } else {
-                dayBudget += amount;
-                const cleanLine = line.replace(/\[\d+\]/, '').replace(/^[-\*\s🛫🏨🍜🛍️🛬]+/, '').trim();
-                const itemHtml = `<div class="item-card">
-                    <span class="item-text">${line}</span>
-                    <button class="map-btn" onclick="openMap('${cleanLine}')">📍 地圖</button>
-                </div>`;
-                if (dayBlocks.length > 0) {
-                    dayBlocks[dayBlocks.length - 1].html += itemHtml;
-                } else {
-                    // 如果第一行不是日期，直接加進去
-                    html += itemHtml;
-                }
-            }
-        });
-
-        // 處理最後一天的小計
-        if (dayBlocks.length > 0) {
-            let lastBlock = dayBlocks[dayBlocks.length - 1];
-            lastBlock.html = lastBlock.html.replace('{{DAY_BUDGET}}', dayBudget > 0 ? ` (預算: ${dayBudget.toLocaleString()})` : '');
-            dayBlocks.forEach(block => html += block.html + '</div>');
+    function renderItinerary() {
+        const list = document.getElementById('itinerary-list');
+        const trip = myTrips.find(t => t.id === currentTripId);
+        const dayItems = (trip.items || []).filter(item => item.day === currentDay).sort((a,b) => a.time.localeCompare(b.time));
+        
+        if(dayItems.length === 0) {
+            list.innerHTML = `<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程，按右下角 + 開始規劃！</p>`;
+            return;
         }
 
-        display.innerHTML = html || '<p style="color:#999; text-align:center;">尚無行程</p>';
-        document.getElementById('itinerary-input').value = content;
-        document.getElementById('total-budget-tag').innerText = `總預算: ${totalBudget.toLocaleString()}`;
+        list.innerHTML = dayItems.map(item => `
+            <div class="item-card">
+                <div class="item-time">${item.time}</div>
+                <div class="item-main">
+                    <div class="item-title">${item.name}</div>
+                    ${item.remark ? `<div class="item-remark">${item.remark}</div>` : ''}
+                    <div class="item-meta">
+                        ${item.budget > 0 ? `<span class="badge badge-price">¥ ${item.budget.toLocaleString()}</span>` : ''}
+                        ${item.location ? `<span class="badge badge-map" onclick="openMap('${item.location}')">📍 地圖</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
-    function openMap(query) {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+    function openItemModal() { document.getElementById('item-modal').classList.add('active'); }
+    function closeItemModal() { document.getElementById('item-modal').classList.remove('active'); }
+
+    function saveItem() {
+        const trip = myTrips.find(t => t.id === currentTripId);
+        if(!trip.items) trip.items = [];
+        
+        const newItem = {
+            id: Date.now(),
+            day: currentDay,
+            time: document.getElementById('item-time').value,
+            name: document.getElementById('item-name').value,
+            location: document.getElementById('item-location').value,
+            remark: document.getElementById('item-remark').value,
+            budget: parseInt(document.getElementById('item-budget').value) || 0
+        };
+
+        trip.items.push(newItem);
+        syncToCloud();
+        renderItinerary();
+        closeItemModal();
+        
+        // Reset
+        document.getElementById('item-name').value = '';
+        document.getElementById('item-location').value = '';
+        document.getElementById('item-remark').value = '';
+        document.getElementById('item-budget').value = '';
     }
 
-    function toggleEditItinerary() {
-        const d = document.getElementById('itinerary-display'), e = document.getElementById('itinerary-edit'), b = document.getElementById('edit-btn');
-        const isE = e.style.display === 'none';
-        e.style.display = isE ? 'block' : 'none'; d.style.display = isE ? 'none' : 'block';
-        b.innerText = isE ? '取消' : '編輯';
-    }
-
-    function saveItinerary() {
-        const idx = myTrips.findIndex(t => t.id === currentTripId);
-        myTrips[idx].itinerary = document.getElementById('itinerary-input').value;
-        displayItinerary(myTrips[idx].itinerary); toggleEditItinerary(); syncToCloud();
-    }
-
+    function openMap(q) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`, '_blank'); }
     function showHome() { location.reload(); }
     function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -252,10 +294,15 @@
     }
 
     async function loadOsakaData() {
-        const resp = await fetch('data.json');
-        const data = await resp.json();
-        const latest = data[data.length - 1];
-        document.getElementById('flight-container').innerHTML = `<div style="display:flex;justify-content:space-between"><div>HKG➔KIX<br><small>UO686</small></div><div style="color:var(--secondary);font-weight:bold">HK$ ${latest.uo686}</div></div>`;
+        try {
+            const resp = await fetch('data.json');
+            const data = await resp.json();
+            const latest = data[data.length - 1];
+            document.getElementById('flight-container').innerHTML = `HKG ➔ KIX (UO686) <span style="float:right;color:var(--secondary);font-weight:bold;">HK$ ${latest.uo686}</span>`;
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, { type: 'line', data: { labels: data.map(d => d.date.split(' ')[0]), datasets: [{ label: '總價', data: data.map(d => d.total), borderColor: '#5d2d91' }] }, options: { responsive:true, maintainAspectRatio:false } });
+        } catch(e) {}
     }
 </script>
 </body>
