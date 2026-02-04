@@ -88,6 +88,25 @@
         <button style="width:100%; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:10px;" onclick="openTripModal()">➕ 新增旅行</button>
     </div>
 
+    <!-- Modal for New Trip -->
+    <div id="trip-modal" class="modal">
+        <div class="modal-content">
+            <h3>🌍 開展新旅程</h3>
+            <div class="form-row">
+                <label>行程名稱</label>
+                <input type="text" id="new-trip-title" placeholder="例如：2026 東京之旅">
+            </div>
+            <div class="form-row">
+                <label>選擇圖示 (Emoji)</label>
+                <input type="text" id="new-trip-icon" value="✈️">
+            </div>
+            <div class="modal-footer">
+                <button style="background:#eee;" onclick="closeTripModal()">取消</button>
+                <button style="background:var(--primary); color:white;" onclick="addNewTrip()">建立</button>
+            </div>
+        </div>
+    </div>
+
     <div id="view-detail">
         <!-- Overview Tab -->
         <div id="tab-overview" class="tab-content active">
@@ -198,7 +217,36 @@
 
     function renderTripList() {
         const list = document.getElementById('trip-list');
+        if (myTrips.length === 0) {
+            list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">尚無行程，點擊下方新增</p>';
+            return;
+        }
         list.innerHTML = myTrips.map(t => `<div class="trip-card" onclick="showTrip('${t.id}')"><div style="font-size:2em;margin-right:15px;">${t.icon}</div><div><div style="font-weight:bold;">${t.title}</div><small style="color:#999;">${t.status}</small></div></div>`).join('');
+    }
+
+    function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
+    function closeTripModal() { document.getElementById('trip-modal').classList.remove('active'); }
+
+    function addNewTrip() {
+        const title = document.getElementById('new-trip-title').value;
+        const icon = document.getElementById('new-trip-icon').value;
+        if (!title) return alert('請輸入行程名稱');
+
+        const newTrip = {
+            id: 'trip-' + Date.now(),
+            title: title,
+            icon: icon || '✈️',
+            status: '規劃中',
+            items: []
+        };
+
+        myTrips.push(newTrip);
+        renderTripList();
+        syncToCloud();
+        closeTripModal();
+        
+        // 重設輸入
+        document.getElementById('new-trip-title').value = '';
     }
 
     function showTrip(tripId) {
