@@ -96,6 +96,16 @@
                 <label>行程名稱</label>
                 <input type="text" id="new-trip-title" placeholder="例如：2026 東京之旅">
             </div>
+            <div class="form-row" style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>開始日期</label>
+                    <input type="date" id="new-trip-start">
+                </div>
+                <div style="flex: 1;">
+                    <label>結束日期</label>
+                    <input type="date" id="new-trip-end">
+                </div>
+            </div>
             <div class="form-row">
                 <label>選擇圖示 (Emoji)</label>
                 <input type="text" id="new-trip-icon" value="✈️">
@@ -221,21 +231,42 @@
             list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">尚無行程，點擊下方新增</p>';
             return;
         }
-        list.innerHTML = myTrips.map(t => `<div class="trip-card" onclick="showTrip('${t.id}')"><div style="font-size:2em;margin-right:15px;">${t.icon}</div><div><div style="font-weight:bold;">${t.title}</div><small style="color:#999;">${t.status}</small></div></div>`).join('');
+        list.innerHTML = myTrips.map(t => `
+            <div class="trip-card" onclick="showTrip('${t.id}')">
+                <div style="font-size:2em;margin-right:15px;">${t.icon}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold;">${t.title}</div>
+                    <small style="color:#666;">${t.startDate || ''} ~ ${t.endDate || ''}</small>
+                </div>
+                <div>❯</div>
+            </div>
+        `).join('');
     }
 
-    function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
+    function openTripModal() { 
+        document.getElementById('trip-modal').classList.add('active'); 
+        // 預設今天
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('new-trip-start').value = today;
+        document.getElementById('new-trip-end').value = today;
+    }
+
     function closeTripModal() { document.getElementById('trip-modal').classList.remove('active'); }
 
     function addNewTrip() {
         const title = document.getElementById('new-trip-title').value;
         const icon = document.getElementById('new-trip-icon').value;
-        if (!title) return alert('請輸入行程名稱');
+        const start = document.getElementById('new-trip-start').value;
+        const end = document.getElementById('new-trip-end').value;
+        
+        if (!title || !start || !end) return alert('請填寫完整資訊');
 
         const newTrip = {
             id: 'trip-' + Date.now(),
             title: title,
             icon: icon || '✈️',
+            startDate: start,
+            endDate: end,
             status: '規劃中',
             items: []
         };
@@ -244,13 +275,12 @@
         renderTripList();
         syncToCloud();
         closeTripModal();
-        
-        // 重設輸入
-        document.getElementById('new-trip-title').value = '';
+        showTrip(newTrip.id);
     }
 
     function showTrip(tripId) {
         currentTripId = tripId;
+        currentDay = 1;
         const trip = myTrips.find(t => t.id === tripId);
         document.getElementById('view-home').classList.remove('active');
         document.getElementById('view-detail').classList.add('active');
@@ -264,9 +294,18 @@
 
     function renderDayTabs() {
         const tabs = document.getElementById('day-tabs');
-        // Let's assume 9 days for now, can be dynamic
+        const trip = myTrips.find(t => t.id === currentTripId);
+        
+        // 計算總天數
+        let totalDays = 1;
+        if(trip.startDate && trip.endDate) {
+            const start = new Date(trip.startDate);
+            const end = new Date(trip.endDate);
+            totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        }
+
         let html = '';
-        for(let i=1; i<=9; i++) {
+        for(let i=1; i<=totalDays; i++) {
             html += `<div class="day-tab ${i === currentDay ? 'active' : ''}" onclick="selectDay(${i})">第 ${i} 天</div>`;
         }
         tabs.innerHTML = html;
