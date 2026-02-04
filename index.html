@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的旅行隨身 App | SzeYuen</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #5d2d91; --secondary: #e91e63; --bg: #f4f6f9; --card-bg: #ffffff; --text: #1c1e21; }
-        body { font-family: -apple-system, "PingFang HK", sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 70px; color: var(--text); }
+        body { font-family: -apple-system, "PingFang HK", sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 20px; color: var(--text); }
         
         #view-login { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); color: white; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; text-align: center; }
         #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; text-align: center; }
@@ -19,51 +18,38 @@
 
         .container { padding: 15px; max-width: 600px; margin: 0 auto; }
         
-        /* Home List */
         #view-home { display: none; }
         #view-home.active { display: block; }
         .trip-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        /* Detail View */
         #view-detail { display: none; }
         #view-detail.active { display: block; }
 
-        /* Day Tabs (Horizontal Scroll) */
         .day-tabs { display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
         .day-tabs::-webkit-scrollbar { display: none; }
         .day-tab { padding: 8px 20px; background: white; border-radius: 20px; margin-right: 10px; font-size: 0.9em; border: 1px solid #ddd; flex-shrink: 0; }
         .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
 
-        /* Itinerary Item Card */
-        .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .item-time { color: var(--primary); font-weight: bold; font-size: 0.9em; width: 45px; }
         .item-main { flex: 1; }
         .item-title { font-weight: bold; font-size: 1.05em; margin-bottom: 4px; }
         .item-remark { font-size: 0.85em; color: #777; margin-bottom: 8px; }
-        .item-meta { display: flex; gap: 10px; }
-        .badge { font-size: 0.75em; padding: 2px 8px; border-radius: 4px; }
-        .badge-price { background: #fff3e0; color: #ff9800; border: 1px solid #ffe0b2; }
+        .badge { font-size: 0.75em; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        .badge-price { background: #fff3e0; color: #ff9800; border: 1px solid #ffe0b2; margin-right: 5px; }
         .badge-map { background: #e3f2fd; color: #2196f3; border: 1px solid #bbdefb; cursor: pointer; }
 
-        /* Floating Add Button */
-        .fab { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 900; border: none; }
+        .fab { position: fixed; bottom: 30px; right: 20px; width: 56px; height: 56px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 900; border: none; }
 
-        /* Editor Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: flex-end; }
         .modal.active { display: flex; }
         .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-content h3 { margin-top: 0; font-size: 1.1em; color: var(--primary); }
         .form-row { margin-bottom: 15px; }
         .form-row label { display: block; font-size: 0.85em; color: #666; margin-bottom: 5px; }
         .form-row input, .form-row textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; }
-        .modal-footer { display: flex; gap: 10px; }
-        .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
-
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: none; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
-        nav.active { display: flex; }
-        nav button { background: none; border: none; color: #888; font-size: 0.8em; flex: 1; }
-        nav button.active { color: var(--primary); font-weight: bold; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -83,121 +69,51 @@
 </header>
 
 <div class="container">
+    <!-- Home View -->
     <div id="view-home">
         <div id="trip-list"></div>
-        <button style="width:100%; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:10px;" onclick="openTripModal()">➕ 新增旅行</button>
+        <button style="width:100%; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:10px;" onclick="openTripModal()">➕ 新增旅行行程</button>
     </div>
 
-    <!-- Modal for New Trip -->
-    <div id="trip-modal" class="modal">
-        <div class="modal-content">
-            <h3>🌍 開展新旅程</h3>
-            <div class="form-row">
-                <label>行程名稱</label>
-                <input type="text" id="new-trip-title" placeholder="例如：2026 東京之旅">
-            </div>
-            <div class="form-row" style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                    <label>開始日期</label>
-                    <input type="date" id="new-trip-start">
-                </div>
-                <div style="flex: 1;">
-                    <label>結束日期</label>
-                    <input type="date" id="new-trip-end">
-                </div>
-            </div>
-            <div class="form-row">
-                <label>選擇圖示 (Emoji)</label>
-                <input type="text" id="new-trip-icon" value="✈️">
-            </div>
-            <div class="modal-footer">
-                <button style="background:#eee;" onclick="closeTripModal()">取消</button>
-                <button style="background:var(--primary); color:white;" onclick="addNewTrip()">建立</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Detail View (Directly Itinerary) -->
     <div id="view-detail">
-        <!-- Overview Tab -->
-        <div id="tab-overview" class="tab-content active">
-            <div class="card">
-                <h3>📈 票價走勢 (大阪行程)</h3>
-                <div style="height:250px"><canvas id="priceChart"></canvas></div>
-            </div>
-            <div class="card">
-                <h3>📝 行程摘要</h3>
-                <p id="trip-summary">正在生成摘要...</p>
-            </div>
-        </div>
-
-        <!-- Itinerary Tab -->
-        <div id="tab-itinerary" class="tab-content">
-            <div class="day-tabs" id="day-tabs">
-                <!-- Day 1, Day 2... -->
-            </div>
-            <div id="itinerary-list">
-                <!-- Items for selected day -->
-            </div>
-            <button class="fab" onclick="openItemModal()">+</button>
-        </div>
+        <div class="day-tabs" id="day-tabs"></div>
+        <div id="itinerary-list"></div>
+        <button class="fab" onclick="openItemModal()">+</button>
     </div>
 </div>
 
-<!-- Item Editor Modal -->
-<div id="item-modal" class="modal">
-    <div class="modal-content">
-        <h3 id="modal-title">新增活動</h3>
-        <div class="form-row">
-            <label>時間</label>
-            <input type="time" id="item-time" value="09:00">
-        </div>
-        <div class="form-row">
-            <label>活動名稱</label>
-            <input type="text" id="item-name" placeholder="例如：築地市場食早餐">
-        </div>
-        <div class="form-row">
-            <label>地點 (用於地圖導航)</label>
-            <input type="text" id="item-location" placeholder="例如：Tsukiji Outer Market">
-        </div>
-        <div class="form-row">
-            <label>備註</label>
-            <textarea id="item-remark" rows="2" placeholder="備註或注意事項"></textarea>
-        </div>
-        <div class="form-row">
-            <label>預算 (HKD/JPY)</label>
-            <input type="number" id="item-budget" placeholder="0">
-        </div>
-        <div class="modal-footer">
-            <button style="background:#eee;" onclick="closeItemModal()">取消</button>
-            <button style="background:var(--primary); color:white;" onclick="saveItem()">儲存</button>
-        </div>
+<!-- Modals -->
+<div id="trip-modal" class="modal"><div class="modal-content">
+    <h3>🌍 開展新旅程</h3>
+    <div class="form-row"><label>名稱</label><input type="text" id="new-trip-title"></div>
+    <div class="form-row" style="display:flex; gap:10px;">
+        <div style="flex:1;"><label>開始</label><input type="date" id="new-trip-start"></div>
+        <div style="flex:1;"><label>結束</label><input type="date" id="new-trip-end"></div>
     </div>
-</div>
+    <div class="modal-footer"><button style="background:#eee;" onclick="closeTripModal()">取消</button><button style="background:var(--primary);color:white;" onclick="addNewTrip()">建立</button></div>
+</div></div>
 
-<nav id="app-nav">
-    <button onclick="switchTab('overview')" id="nav-overview" class="active">📊<br>概覽</button>
-    <button onclick="switchTab('itinerary')" id="nav-itinerary">🗺️<br>行程</button>
-</nav>
+<div id="item-modal" class="modal"><div class="modal-content">
+    <h3>新增活動</h3>
+    <div class="form-row"><label>時間</label><input type="time" id="item-time" value="09:00"></div>
+    <div class="form-row"><label>活動</label><input type="text" id="item-name"></div>
+    <div class="form-row"><label>地點</label><input type="text" id="item-location"></div>
+    <div class="form-row"><label>備註</label><textarea id="item-remark" rows="2"></textarea></div>
+    <div class="form-row"><label>預算</label><input type="number" id="item-budget"></div>
+    <div class="modal-footer"><button style="background:#eee;" onclick="closeItemModal()">取消</button><button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button></div>
+</div></div>
 
 <script>
     const DATA_REPO = 'tsy-del/japan-trip-2026';
     let GITHUB_TOKEN = localStorage.getItem('app_token');
     let currentUser = localStorage.getItem('app_user');
-    let myTrips = [];
-    let currentTripId = null;
-    let currentDay = 1;
-    let chartInstance = null;
+    let myTrips = [], currentTripId = null, currentDay = 1;
 
     function handleLogin() {
-        const name = document.getElementById('user-name').value;
-        const token = document.getElementById('access-key').value;
-        if (name && token) {
-            localStorage.setItem('app_user', name);
-            localStorage.setItem('app_token', token);
-            location.reload();
-        }
+        const n = document.getElementById('user-name').value, t = document.getElementById('access-key').value;
+        if (n && t) { localStorage.setItem('app_user', n); localStorage.setItem('app_token', t); location.reload(); }
     }
-
     function handleLogout() { if(confirm('登出？')) { localStorage.clear(); location.reload(); } }
 
     if (currentUser && GITHUB_TOKEN) {
@@ -215,11 +131,7 @@
             const file = await resp.json();
             myTrips = JSON.parse(decodeURIComponent(escape(atob(file.content))));
             renderTripList();
-        } catch (e) {
-            // If v2 not found, try to migrate from old data or start fresh
-            myTrips = [{ id: 'osaka-2026', title: '2026 大阪夏季之旅', icon: '🇯🇵', status: '進行中', items: [] }];
-            renderTripList();
-        }
+        } catch (e) { myTrips = []; renderTripList(); }
     }
 
     async function syncToCloud() {
@@ -227,181 +139,62 @@
         const file = await getFile.json();
         await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, {
             method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
-            body: JSON.stringify({ message: 'Sync V2', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file ? file.sha : null })
+            body: JSON.stringify({ message: 'Sync', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file.sha })
         });
     }
 
     function renderTripList() {
-        const list = document.getElementById('trip-list');
-        if (myTrips.length === 0) {
-            list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">尚無行程，點擊下方新增</p>';
-            return;
-        }
-        list.innerHTML = myTrips.map(t => `
-            <div class="trip-card" onclick="showTrip('${t.id}')">
-                <div style="font-size:2em;margin-right:15px;">${t.icon}</div>
-                <div style="flex:1;">
-                    <div style="font-weight:bold;">${t.title}</div>
-                    <small style="color:#666;">${t.startDate || ''} ~ ${t.endDate || ''}</small>
-                </div>
-                <div>❯</div>
-            </div>
-        `).join('');
+        document.getElementById('trip-list').innerHTML = myTrips.map(t => `<div class="trip-card" onclick="showTrip('${t.id}')"><div style="flex:1;"><div style="font-weight:bold;">${t.title}</div><small style="color:#999;">${t.startDate} ~ ${t.endDate}</small></div><div>❯</div></div>`).join('');
     }
 
-    function openTripModal() { 
-        document.getElementById('trip-modal').classList.add('active'); 
-        // 預設今天
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('new-trip-start').value = today;
-        document.getElementById('new-trip-end').value = today;
-    }
-
-    function closeTripModal() { document.getElementById('trip-modal').classList.remove('active'); }
-
-    function addNewTrip() {
-        const title = document.getElementById('new-trip-title').value;
-        const icon = document.getElementById('new-trip-icon').value;
-        const start = document.getElementById('new-trip-start').value;
-        const end = document.getElementById('new-trip-end').value;
-        
-        if (!title || !start || !end) return alert('請填寫完整資訊');
-
-        const newTrip = {
-            id: 'trip-' + Date.now(),
-            title: title,
-            icon: icon || '✈️',
-            startDate: start,
-            endDate: end,
-            status: '規劃中',
-            items: []
-        };
-
-        myTrips.push(newTrip);
-        renderTripList();
-        syncToCloud();
-        closeTripModal();
-        showTrip(newTrip.id);
-    }
-
-    function showTrip(tripId) {
-        currentTripId = tripId;
-        currentDay = 1;
-        const trip = myTrips.find(t => t.id === tripId);
+    function showTrip(tid) {
+        currentTripId = tid; currentDay = 1;
+        const t = myTrips.find(x => x.id === tid);
         document.getElementById('view-home').classList.remove('active');
         document.getElementById('view-detail').classList.add('active');
-        document.getElementById('app-nav').classList.add('active');
         document.getElementById('btn-back').style.display = 'block';
-        document.getElementById('header-title').innerText = trip.title;
-        
-        // 更新摘要
-        document.getElementById('trip-summary').innerText = `這是一個由 ${trip.startDate} 到 ${trip.endDate} 的旅程。`;
-        
-        renderDayTabs();
-        renderItinerary();
-        if(tripId === 'osaka-2026') loadOsakaData();
-        else document.getElementById('tab-overview').innerHTML = `<div class="card"><h3>📊 行程數據</h3><p style="color:#999">目前僅「大阪行程」提供自動機價追蹤數據。</p></div><div class="card"><h3>📝 行程摘要</h3><p>這是一個由 ${trip.startDate} 到 ${trip.endDate} 的旅程。</p></div>`;
+        document.getElementById('header-title').innerText = t.title;
+        renderDayTabs(); renderItinerary();
     }
 
     function renderDayTabs() {
-        const tabs = document.getElementById('day-tabs');
-        const trip = myTrips.find(t => t.id === currentTripId);
-        
-        // 計算總天數
-        let totalDays = 1;
-        if(trip.startDate && trip.endDate) {
-            const start = new Date(trip.startDate);
-            const end = new Date(trip.endDate);
-            totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        }
-
-        let html = '';
-        for(let i=1; i<=totalDays; i++) {
-            html += `<div class="day-tab ${i === currentDay ? 'active' : ''}" onclick="selectDay(${i})">第 ${i} 天</div>`;
-        }
-        tabs.innerHTML = html;
-    }
-
-    function selectDay(day) {
-        currentDay = day;
-        renderDayTabs();
-        renderItinerary();
+        const t = myTrips.find(x => x.id === currentTripId);
+        const days = Math.ceil((new Date(t.endDate) - new Date(t.startDate)) / 86400000) + 1;
+        let h = ''; for(let i=1; i<=days; i++) h += `<div class="day-tab ${i===currentDay?'active':''}" onclick="currentDay=${i};renderDayTabs();renderItinerary();">第 ${i} 天</div>`;
+        document.getElementById('day-tabs').innerHTML = h;
     }
 
     function renderItinerary() {
-        const list = document.getElementById('itinerary-list');
-        const trip = myTrips.find(t => t.id === currentTripId);
-        const dayItems = (trip.items || []).filter(item => item.day === currentDay).sort((a,b) => a.time.localeCompare(b.time));
-        
-        if(dayItems.length === 0) {
-            list.innerHTML = `<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程，按右下角 + 開始規劃！</p>`;
-            return;
-        }
-
-        list.innerHTML = dayItems.map(item => `
+        const items = (myTrips.find(x=>x.id===currentTripId).items || []).filter(x=>x.day===currentDay).sort((a,b)=>a.time.localeCompare(b.time));
+        document.getElementById('itinerary-list').innerHTML = items.length ? items.map(item => `
             <div class="item-card">
                 <div class="item-time">${item.time}</div>
                 <div class="item-main">
                     <div class="item-title">${item.name}</div>
                     ${item.remark ? `<div class="item-remark">${item.remark}</div>` : ''}
-                    <div class="item-meta">
-                        ${item.budget > 0 ? `<span class="badge badge-price">¥ ${item.budget.toLocaleString()}</span>` : ''}
-                        ${item.location ? `<span class="badge badge-map" onclick="openMap('${item.location}')">📍 地圖</span>` : ''}
-                    </div>
+                    ${item.budget > 0 ? `<span class="badge badge-price">¥ ${item.budget.toLocaleString()}</span>` : ''}
+                    ${item.location ? `<span class="badge badge-map" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}')">📍 地圖</span>` : ''}
                 </div>
-            </div>
-        `).join('');
+            </div>`).join('') : '<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程</p>';
     }
 
+    function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
+    function closeTripModal() { document.getElementById('trip-modal').classList.remove('active'); }
+    function addNewTrip() {
+        const t = document.getElementById('new-trip-title').value, s = document.getElementById('new-trip-start').value, e = document.getElementById('new-trip-end').value;
+        if(!t || !s || !e) return alert('必填');
+        const nt = { id:'trip-'+Date.now(), title:t, startDate:s, endDate:e, items:[] };
+        myTrips.push(nt); syncToCloud(); renderTripList(); closeTripModal(); showTrip(nt.id);
+    }
     function openItemModal() { document.getElementById('item-modal').classList.add('active'); }
     function closeItemModal() { document.getElementById('item-modal').classList.remove('active'); }
-
     function saveItem() {
-        const trip = myTrips.find(t => t.id === currentTripId);
-        if(!trip.items) trip.items = [];
-        
-        const newItem = {
-            id: Date.now(),
-            day: currentDay,
-            time: document.getElementById('item-time').value,
-            name: document.getElementById('item-name').value,
-            location: document.getElementById('item-location').value,
-            remark: document.getElementById('item-remark').value,
-            budget: parseInt(document.getElementById('item-budget').value) || 0
-        };
-
-        trip.items.push(newItem);
-        syncToCloud();
-        renderItinerary();
-        closeItemModal();
-        
-        // Reset
-        document.getElementById('item-name').value = '';
-        document.getElementById('item-location').value = '';
-        document.getElementById('item-remark').value = '';
-        document.getElementById('item-budget').value = '';
+        const trip = myTrips.find(x=>x.id===currentTripId); if(!trip.items) trip.items = [];
+        trip.items.push({ id:Date.now(), day:currentDay, time:document.getElementById('item-time').value, name:document.getElementById('item-name').value, location:document.getElementById('item-location').value, remark:document.getElementById('item-remark').value, budget:parseInt(document.getElementById('item-budget').value)||0 });
+        syncToCloud(); renderItinerary(); closeItemModal();
+        document.getElementById('item-name').value = ''; document.getElementById('item-location').value = '';
     }
-
-    function openMap(q) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`, '_blank'); }
     function showHome() { location.reload(); }
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        document.getElementById('nav-' + id).classList.add('active');
-    }
-
-    async function loadOsakaData() {
-        try {
-            const resp = await fetch('data.json');
-            const data = await resp.json();
-            const latest = data[data.length - 1];
-            document.getElementById('flight-container').innerHTML = `HKG ➔ KIX (UO686) <span style="float:right;color:var(--secondary);font-weight:bold;">HK$ ${latest.uo686}</span>`;
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, { type: 'line', data: { labels: data.map(d => d.date.split(' ')[0]), datasets: [{ label: '總價', data: data.map(d => d.total), borderColor: '#5d2d91' }] }, options: { responsive:true, maintainAspectRatio:false } });
-        } catch(e) {}
-    }
 </script>
 </body>
 </html>
