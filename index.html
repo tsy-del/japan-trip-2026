@@ -142,10 +142,19 @@
             const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json?t=${Date.now()}`, {
                 headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
             });
+            if (!resp.ok) {
+                console.log("V2 data not found, staying with local/empty.");
+                renderTripList();
+                return;
+            }
             const file = await resp.json();
-            myTrips = JSON.parse(decodeURIComponent(escape(atob(file.content))));
+            const decoded = decodeURIComponent(escape(atob(file.content)));
+            myTrips = JSON.parse(decoded);
             renderTripList();
-        } catch (e) { myTrips = []; renderTripList(); }
+        } catch (e) { 
+            console.error("Sync Error:", e);
+            document.getElementById('trip-list').innerHTML = `<p style="color:red;padding:20px;text-align:center;">同步出錯: ${e.message}<br>請檢查 Token 權限或網絡。</p>`;
+        }
     }
 
     async function syncToCloud() {
