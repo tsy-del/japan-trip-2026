@@ -13,6 +13,15 @@
         "location": "testing",
         "remark": "",
         "budget": 0
+      },
+      {
+        "id": 1770188259448,
+        "day": 1,
+        "time": "13:00",
+        "name": "testing2",
+        "location": "",
+        "remark": "",
+        "budget": 0
       }
     ]
   }
