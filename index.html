@@ -16,6 +16,14 @@
         .chart-container { position: relative; height: 300px; width: 100%; }
         .tag { background: #5d2d91; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
         .loading { text-align: center; color: #888; padding: 20px; }
+        
+        /* Itinerary Styles */
+        .day-item { margin-bottom: 20px; border-left: 3px solid #5d2d91; padding-left: 15px; }
+        .day-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .day-title { font-weight: bold; color: #5d2d91; font-size: 1.1em; }
+        .day-summary { font-size: 0.9em; color: #666; font-style: italic; }
+        ul { margin: 5px 0; padding-left: 20px; }
+        li { margin-bottom: 5px; font-size: 0.95em; }
     </style>
 </head>
 <body>
@@ -39,6 +47,41 @@
                 <div class="price-tag" id="ret-price">--</div>
             </div>
             <p style="text-align: right; color: #888; font-size: 0.8em;">Latest Total: <span id="total-price">--</span></p>
+        </div>
+
+        <div class="card">
+            <h2>Itinerary Plan</h2>
+            <div id="itinerary-list">
+                <!-- Day 1 -->
+                <div class="day-item">
+                    <div class="day-header">
+                        <span class="day-title">Day 1: 18 Jul (Sat)</span>
+                        <span class="day-summary">Arrival & Osaka</span>
+                    </div>
+                    <ul>
+                        <li>Flight UO686 (08:45 - 13:30)</li>
+                        <li>Check-in at Hotel</li>
+                        <li>Dinner at Dotonbori / Shinsaibashi</li>
+                    </ul>
+                </div>
+
+                <!-- Days in between -->
+                <div class="day-item" style="border-left: 2px dashed #ccc; padding-left: 15px; color: #888; margin: 10px 0;">
+                    <em>... Planning in progress ...</em>
+                </div>
+
+                <!-- Last Day -->
+                <div class="day-item">
+                    <div class="day-header">
+                        <span class="day-title">Day 9: 26 Jul (Sun)</span>
+                        <span class="day-summary">Final Shopping & Departure</span>
+                    </div>
+                    <ul>
+                        <li>Last minute shopping at Rinku Town Outlet</li>
+                        <li>Flight UO899 (17:00 - 20:10)</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div class="card">
