@@ -14,11 +14,14 @@
         #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; text-align: center; font-size: 1.1em; }
         #view-login button { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        header { background: white; color: #333; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 50px; box-sizing: border-box; }
-        header h1 { margin: 0; font-size: 1.1em; flex: 1; text-align: center; }
+        header { background: white; color: #333; padding: 10px 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 55px; box-sizing: border-box; }
+        header h1 { margin: 0; font-size: 1.05em; flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; }
         .back-btn { font-size: 1.2em; cursor: pointer; width: 30px; text-align: left; }
-        .user-tag { font-size: 0.7em; background: #eee; padding: 2px 8px; border-radius: 10px; cursor: pointer; }
-        #delete-trip-btn { display: none; background: none; border: none; color: #ff5252; font-size: 1.1em; cursor: pointer; padding: 5px; }
+        
+        .header-right { display: flex; align-items: center; gap: 6px; }
+        .user-tag { font-size: 0.7em; background: #eee; padding: 3px 8px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+        #data-btn { display: none; font-size: 0.7em; background: var(--secondary); color: white; border: none; padding: 4px 8px; border-radius: 12px; cursor: pointer; white-space: nowrap; }
+        #delete-trip-btn { display: none; background: none; border: none; color: #ff5252; font-size: 1.1em; cursor: pointer; padding: 0 5px; }
 
         .container { max-width: 600px; margin: 0 auto; }
         #view-home { display: none; padding: 15px; }
@@ -33,11 +36,11 @@
 
         .hotel-bar { background: #e3f2fd; border-radius: 12px; padding: 12px 15px; margin: 15px; display: flex; align-items: center; gap: 12px; border: 1px dashed #2196f3; cursor: pointer; }
         .hotel-icon { font-size: 1.4em; }
-        .hotel-info { flex: 1; }
+        .hotel-info { flex: 1; overflow: hidden; }
         .hotel-title { font-weight: bold; font-size: 0.9em; color: #1976d2; }
-        .hotel-addr { font-size: 0.75em; color: #64b5f6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+        .hotel-addr { font-size: 0.75em; color: #64b5f6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .day-tabs { display: flex; overflow-x: auto; white-space: nowrap; background: white; padding: 10px 15px; border-bottom: 1px solid #eee; position: sticky; top: 50px; z-index: 90; }
+        .day-tabs { display: flex; overflow-x: auto; white-space: nowrap; background: white; padding: 10px 15px; border-bottom: 1px solid #eee; position: sticky; top: 55px; z-index: 90; }
         .day-tabs::-webkit-scrollbar { display: none; }
         .day-tab { display: flex; flex-direction: column; align-items: center; padding: 8px 15px; margin-right: 10px; border-radius: 8px; color: #999; min-width: 60px; }
         .day-tab .tab-date { font-size: 0.75em; margin-bottom: 4px; }
@@ -52,29 +55,28 @@
         .item-left { display: flex; flex-direction: column; align-items: center; width: 45px; flex-shrink: 0; justify-content: center; }
         .item-icon-circle { width: 34px; height: 34px; background: #f0f2f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 4px 0; font-size: 1.1em; }
         .item-time-top, .item-time-bottom { font-size: 0.7em; color: #999; }
-        .item-main { flex: 1; }
+        .item-main { flex: 1; overflow: hidden; }
         .item-title { font-weight: bold; font-size: 1.05em; color: #222; }
-        .badge { font-size: 0.65em; padding: 2px 8px; border-radius: 12px; border: 1px solid #ddd; color: #666; margin-right: 5px; }
+        .badge { font-size: 0.65em; padding: 2px 8px; border-radius: 12px; border: 1px solid #ddd; color: #666; margin-right: 5px; display: inline-block; margin-top: 5px; }
         .badge-map { border-color: #2196f3; color: #2196f3; }
 
         .fab { position: fixed; bottom: 30px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); z-index: 1000; border: none; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: flex-end; }
         .modal.active { display: flex; }
-        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; }
         .form-row { margin-bottom: 12px; }
         .form-row label { display: block; font-size: 0.8em; color: #666; margin-bottom: 4px; }
         .form-row input, .form-row textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
         .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
         .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
-        #data-btn { display: none; font-size: 0.8em; background: var(--secondary); color: white; border: none; padding: 4px 10px; border-radius: 15px; cursor: pointer; position: absolute; right: 60px; top: 15px; z-index: 101; }
     </style>
 </head>
 <body>
 
 <div id="view-login">
     <div style="font-size: 3em; margin-bottom: 10px;">✈️</div>
-    <h2 style="margin-bottom: 30px;">旅行隨身 App</h2>
+    <h2 style="margin-bottom: 20px;">旅行隨身 App</h2>
     <input type="text" id="user-name" placeholder="你的名字">
     <input type="password" id="access-key" placeholder="GitHub Token">
     <button onclick="handleLogin()">登入並同步</button>
@@ -82,10 +84,12 @@
 
 <header>
     <div class="back-btn" id="btn-back" onclick="showHome()" style="display:none;">❮</div>
-    <button id="data-btn" onclick="showDataModal()">📊 數據</button>
-    <button id="delete-trip-btn" onclick="deleteEntireTrip()">🗑️</button>
     <h1 id="header-title">我的行程</h1>
-    <span id="display-user" class="user-tag" onclick="handleLogout()">未登入</span>
+    <div class="header-right">
+        <button id="data-btn" onclick="showDataModal()">📊 數據</button>
+        <button id="delete-trip-btn" onclick="deleteEntireTrip()">🗑️</button>
+        <span id="display-user" class="user-tag" onclick="handleLogout()">未登入</span>
+    </div>
 </header>
 
 <div class="container">
@@ -102,7 +106,7 @@
                 <div id="hotel-name-display" class="hotel-title">尚未設定今日住宿</div>
                 <div id="hotel-addr-display" class="hotel-addr">點擊在此設定酒店及地址</div>
             </div>
-            <div style="color: #2196f3; font-size: 0.8em;">編輯 ❯</div>
+            <div style="color: #2196f3; font-size: 0.8em; white-space:nowrap;">編輯 ❯</div>
         </div>
         <div id="itinerary-list"></div>
         <button class="fab" onclick="openItemModal()">+</button>
@@ -111,8 +115,8 @@
 
 <div id="data-modal" class="modal" onclick="if(event.target==this)this.classList.remove('active')"><div class="modal-content" style="height: 400px;">
     <h3>📈 機價走勢 (大阪行程)</h3>
-    <div style="height: 300px;"><canvas id="priceChart"></canvas></div>
-    <button style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #eee; margin-top: 10px;" onclick="document.getElementById('data-modal').classList.remove('active')">關閉</button>
+    <div style="height: 250px;"><canvas id="priceChart"></canvas></div>
+    <button style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #eee; margin-top: 20px;" onclick="document.getElementById('data-modal').classList.remove('active')">關閉</button>
 </div></div>
 
 <div id="trip-modal" class="modal"><div class="modal-content">
@@ -166,7 +170,7 @@
     if (currentUser && GITHUB_TOKEN) {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-home').classList.add('active');
-        document.getElementById('display-user').innerText = currentUser + ' ⇥';
+        document.getElementById('display-user').innerText = currentUser;
         syncFromCloud();
     }
 
