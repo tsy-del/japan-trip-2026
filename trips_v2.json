@@ -152,6 +152,15 @@
       "Joann",
       "Carrie",
       "Andrew"
+    ],
+    "expenses": [
+      {
+        "id": 1770263297364,
+        "day": 1,
+        "name": "Lunch ",
+        "amount": 20000,
+        "paidBy": "Chun"
+      }
     ]
   }
 ]
