@@ -119,7 +119,20 @@
         <div id="map-container"><div id="map"></div></div>
         <div class="day-tabs" id="day-tabs"></div>
         
-        <div class="settlement-box" id="settlement-container" style="display:none;">
+        <!-- 住宿移到上方 -->
+        <div id="hotel-bar" class="hotel-bar" onclick="openHotelModal()">
+            <div class="hotel-icon">🏨</div>
+            <div class="hotel-info">
+                <div id="hotel-name-display" class="hotel-title">尚未設定住宿</div>
+                <div id="hotel-addr-display" class="hotel-addr">點擊在此設定酒店地址</div>
+            </div>
+            <div style="color: #2196f3; font-size: 0.8em; white-space:nowrap;">編輯 ❯</div>
+        </div>
+        
+        <div id="combined-list"></div>
+
+        <!-- 分帳概覽移到下方 -->
+        <div class="settlement-box" id="settlement-container" style="display:none; margin-top: 30px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 style="margin:0; color:#ffeb3b;">💰 分帳概覽</h4>
                 <button onclick="toggleExpenseDetails()" style="background:none; border:1px solid #666; color:#aaa; font-size:0.7em; padding:2px 8px; border-radius:10px;">明細 ❯</button>
@@ -143,17 +156,6 @@
             </div>
             <div id="all-expenses-list"></div>
         </div>
-
-        <div id="hotel-bar" class="hotel-bar" onclick="openHotelModal()">
-            <div class="hotel-icon">🏨</div>
-            <div class="hotel-info">
-                <div id="hotel-name-display" class="hotel-title">尚未設定住宿</div>
-                <div id="hotel-addr-display" class="hotel-addr">點擊在此設定酒店地址</div>
-            </div>
-            <div style="color: #2196f3; font-size: 0.8em; white-space:nowrap;">編輯 ❯</div>
-        </div>
-        
-        <div id="combined-list"></div>
     </div>
 </div>
 
