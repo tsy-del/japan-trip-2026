@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的旅行隨身 App | SzeYuen</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCeXmcV_OP5fkIytN4bnrPKuGT1N8zB79E&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #e91e63; --secondary: #5d2d91; --bg: #f8f9fb; --card-bg: #ffffff; --text: #333; }
-        body { font-family: -apple-system, "PingFang HK", sans-serif; background-color: var(--bg); margin: 0; color: var(--text); padding-bottom: 20px; overflow-x: hidden; }
+        body { font-family: -apple-system, "PingFang HK", sans-serif; background-color: var(--bg); margin: 0; color: var(--text); padding-bottom: 20px; }
         
         #view-login { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--secondary); color: white; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; }
-        #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; text-align: center; font-size: 1.1em; }
-        #view-login button { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        #view-login input { padding: 15px; border-radius: 12px; border: none; width: 80%; max-width: 300px; margin: 10px 0; text-align: center; }
+        #view-login button { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; }
 
-        header { background: white; color: #333; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; height: 50px; box-sizing: border-box; }
-        header h1 { margin: 0; font-size: 1.1em; flex: 1; }
-        .back-btn { font-size: 1.2em; cursor: pointer; padding: 5px; width: 30px; text-align: left; }
-        .user-tag { font-size: 0.7em; background: #eee; padding: 2px 8px; border-radius: 10px; min-width: 40px; cursor: pointer; }
+        header { background: white; color: #333; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 1.1em; flex: 1; text-align: center; }
+        .back-btn { font-size: 1.2em; cursor: pointer; width: 30px; text-align: left; }
+        .user-tag { font-size: 0.7em; background: #eee; padding: 2px 8px; border-radius: 10px; cursor: pointer; }
 
         .container { max-width: 600px; margin: 0 auto; }
-        
         #view-home { display: none; padding: 15px; }
         #view-home.active { display: block; }
         .trip-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
@@ -27,7 +27,6 @@
         #view-detail { display: none; }
         #view-detail.active { display: block; }
 
-        /* Dynamic Map Area */
         #map-container { width: 100%; height: 250px; background: #eee; position: relative; }
         #map { width: 100%; height: 100%; }
 
@@ -42,24 +41,17 @@
         #itinerary-list { padding: 15px; }
         .item-wrapper { position: relative; margin-bottom: 10px; }
         .stay-time { padding-left: 65px; font-size: 0.8em; color: var(--primary); margin: 8px 0; font-weight: bold; }
-        
         .item-card { background: white; border-radius: 12px; padding: 15px; display: flex; gap: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
         .item-left { display: flex; flex-direction: column; align-items: center; width: 45px; flex-shrink: 0; justify-content: center; }
-        .item-time-top { font-size: 0.7em; color: #999; }
         .item-icon-circle { width: 34px; height: 34px; background: #f0f2f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 4px 0; font-size: 1.1em; }
-        .item-time-bottom { font-size: 0.7em; color: #999; }
-
+        .item-time-top, .item-time-bottom { font-size: 0.7em; color: #999; }
         .item-main { flex: 1; }
-        .item-title { font-weight: bold; font-size: 1.05em; margin-bottom: 2px; color: #222; }
-        .item-subtitle { font-size: 0.8em; color: #888; margin-bottom: 4px; }
-        .item-location-text { font-size: 0.75em; color: #999; margin-bottom: 8px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
-        
-        .item-footer { display: flex; gap: 6px; border-top: 1px solid #f9f9f9; padding-top: 8px; }
-        .badge { font-size: 0.65em; padding: 2px 8px; border-radius: 12px; border: 1px solid #ddd; color: #666; }
+        .item-title { font-weight: bold; font-size: 1.05em; color: #222; }
+        .badge { font-size: 0.65em; padding: 2px 8px; border-radius: 12px; border: 1px solid #ddd; color: #666; margin-right: 5px; }
         .badge-map { border-color: #2196f3; color: #2196f3; }
 
         .fab { position: fixed; bottom: 30px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3); z-index: 1000; border: none; }
-
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: flex-end; }
         .modal.active { display: flex; }
         .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; }
@@ -67,7 +59,10 @@
         .form-row label { display: block; font-size: 0.8em; color: #666; margin-bottom: 4px; }
         .form-row input, .form-row textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
         .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
-        .modal-footer button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; }
+
+        /* Data Button Styling */
+        #data-btn { display: none; font-size: 0.8em; background: var(--secondary); color: white; border: none; padding: 4px 10px; border-radius: 15px; cursor: pointer; position: absolute; right: 60px; top: 15px; z-index: 101; }
     </style>
 </head>
 <body>
@@ -82,6 +77,7 @@
 
 <header>
     <div class="back-btn" id="btn-back" onclick="showHome()" style="display:none;">❮</div>
+    <button id="data-btn" onclick="showDataModal()">📊 數據</button>
     <h1 id="header-title">我的行程</h1>
     <span id="display-user" class="user-tag" onclick="handleLogout()">未登入</span>
 </header>
@@ -91,41 +87,36 @@
         <div id="trip-list"></div>
         <button style="width:100%; background:var(--secondary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:10px;" onclick="openTripModal()">➕ 新增旅行行程</button>
     </div>
-
     <div id="view-detail">
-        <div id="map-container">
-            <div id="map"></div>
-        </div>
+        <div id="map-container"><div id="map"></div></div>
         <div class="day-tabs" id="day-tabs"></div>
         <div id="itinerary-list"></div>
         <button class="fab" onclick="openItemModal()">+</button>
     </div>
 </div>
 
-<!-- Modals -->
+<!-- Modal: Data Chart -->
+<div id="data-modal" class="modal" onclick="if(event.target==this)this.classList.remove('active')"><div class="modal-content" style="height: 400px;">
+    <h3>📈 機價走勢 (大阪行程)</h3>
+    <div style="height: 300px;"><canvas id="priceChart"></canvas></div>
+    <button style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #eee; margin-top: 10px;" onclick="document.getElementById('data-modal').classList.remove('active')">關閉</button>
+</div></div>
+
+<!-- Other Modals (Trip & Item) -->
 <div id="trip-modal" class="modal"><div class="modal-content">
     <h3>🌍 開展新旅程</h3>
     <div class="form-row"><label>名稱</label><input type="text" id="new-trip-title"></div>
-    <div class="form-row" style="display:flex; gap:10px;">
-        <div style="flex:1;"><label>開始</label><input type="date" id="new-trip-start"></div>
-        <div style="flex:1;"><label>結束</label><input type="date" id="new-trip-end"></div>
-    </div>
+    <div class="form-row" style="display:flex; gap:10px;"><div style="flex:1;"><label>開始</label><input type="date" id="new-trip-start"></div><div style="flex:1;"><label>結束</label><input type="date" id="new-trip-end"></div></div>
     <div class="modal-footer"><button style="background:#eee;" onclick="closeTripModal()">取消</button><button style="background:var(--primary);color:white;" onclick="addNewTrip()">建立</button></div>
 </div></div>
 
 <div id="item-modal" class="modal"><div class="modal-content">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h3 id="item-modal-title" style="margin:0; font-size:1.1em;">新增活動</h3>
-        <button onclick="toggleFlightMode()" id="flight-mode-btn" style="background:#f0f0f0; border:1px solid #ddd; padding:4px 10px; border-radius:15px; font-size:0.8em;">✈️ 航班模式</button>
-    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 id="item-modal-title" style="margin:0;">新增活動</h3><button onclick="toggleFlightMode()" id="flight-mode-btn" style="background:#f0f0f0; border:1px solid #ddd; padding:4px 10px; border-radius:15px; font-size:0.8em;">✈️ 航班模式</button></div>
     <div id="normal-fields">
-        <div class="form-row" style="display:flex; gap:10px;">
-            <div style="flex:1;"><label>開始時間</label><input type="time" id="item-time" value="09:00"></div>
-            <div style="flex:1;"><label>結束時間</label><input type="time" id="item-time-end" value="10:00"></div>
-        </div>
+        <div class="form-row" style="display:flex; gap:10px;"><div style="flex:1;"><label>開始</label><input type="time" id="item-time" value="09:00"></div><div style="flex:1;"><label>結束</label><input type="time" id="item-time-end"></div></div>
         <div class="form-row"><label>活動名稱</label><input type="text" id="item-name"></div>
-        <div class="form-row"><label>副標題 (日/英)</label><input type="text" id="item-sub"></div>
-        <div class="form-row"><label>地點/地址</label><input type="text" id="item-location"></div>
+        <div class="form-row"><label>副標題</label><input type="text" id="item-sub"></div>
+        <div class="form-row"><label>地點</label><input type="text" id="item-location"></div>
         <div class="form-row"><label>備註</label><textarea id="item-remark" rows="2"></textarea></div>
     </div>
     <div id="flight-fields" style="display:none;">
@@ -134,19 +125,14 @@
         <div class="form-row"><label>航班編號</label><input type="text" id="flight-no"></div>
         <div class="form-row"><label>飛行時間</label><input type="text" id="flight-duration"></div>
     </div>
-    <div class="modal-footer">
-        <button style="background:#eee;" onclick="closeItemModal()">取消</button>
-        <button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button>
-    </div>
+    <div class="modal-footer"><button style="background:#eee;" onclick="closeItemModal()">取消</button><button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button></div>
     <button id="delete-item-btn" style="display:none; width:100%; background:#ff5252; color:white; border:none; padding:12px; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;" onclick="deleteItem()">🗑️ 刪除此行程</button>
 </div></div>
 
 <script>
     const DATA_REPO = 'tsy-del/japan-trip-2026';
-    let GITHUB_TOKEN = localStorage.getItem('app_token');
-    let currentUser = localStorage.getItem('app_user');
-    let myTrips = [], currentTripId = null, currentDay = 1;
-    let googleMap = null, markers = [], polyline = null;
+    let GITHUB_TOKEN = localStorage.getItem('app_token'), currentUser = localStorage.getItem('app_user');
+    let myTrips = [], currentTripId = null, currentDay = 1, googleMap = null, markers = [], polyline = null, chartInstance = null;
 
     function handleLogin() {
         const n = document.getElementById('user-name').value, t = document.getElementById('access-key').value;
@@ -163,39 +149,20 @@
 
     async function syncFromCloud() {
         try {
-            const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json?t=${Date.now()}`, {
-                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-            });
-            const file = await resp.json();
-            myTrips = JSON.parse(decodeURIComponent(escape(atob(file.content))));
+            const resp = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json?t=${Date.now()}`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
+            if (!resp.ok) return renderTripList();
+            myTrips = JSON.parse(decodeURIComponent(escape(atob((await resp.json()).content))));
             renderTripList();
-        } catch (e) { myTrips = []; renderTripList(); }
+        } catch (e) { renderTripList(); }
     }
 
     async function syncToCloud() {
-        try {
-            const getFile = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            const file = await getFile.json();
-            await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, {
-                method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
-                body: JSON.stringify({ message: 'Sync', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file.sha })
-            });
-        } catch(e) { console.error(e); }
-    }
-
-    function initMap() {
-        googleMap = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: 35.6895, lng: 139.6917 },
-            zoom: 12,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false
+        const getFile = await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+        const file = await getFile.json();
+        await fetch(`https://api.github.com/repos/${DATA_REPO}/contents/trips_v2.json`, {
+            method: 'PUT', headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
+            body: JSON.stringify({ message: 'Sync', content: btoa(unescape(encodeURIComponent(JSON.stringify(myTrips, null, 2)))), sha: file.sha })
         });
-
-        // 加入地址自動補完功能
-        const input = document.getElementById('item-location');
-        const autocomplete = new google.maps.places.Autocomplete(input);
-        autocomplete.bindTo('bounds', googleMap);
     }
 
     function renderTripList() {
@@ -209,72 +176,52 @@
         document.getElementById('view-detail').classList.add('active');
         document.getElementById('btn-back').style.display = 'block';
         document.getElementById('header-title').innerText = t.title;
+        document.getElementById('data-btn').style.display = (tid === 'osaka-2026' || t.title.includes('大阪')) ? 'block' : 'none';
         if (!googleMap) initMap();
         renderDayTabs(); renderItinerary();
     }
 
+    function showDataModal() {
+        document.getElementById('data-modal').classList.add('active');
+        loadPriceChart();
+    }
+
+    async function loadPriceChart() {
+        const resp = await fetch('data.json?t=' + Date.now());
+        const data = await resp.json();
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date.split(' ')[0]),
+                datasets: [{ label: '總價 (HKD)', data: data.map(d => d.total), borderColor: '#e91e63', tension: 0.3, fill: true, backgroundColor: 'rgba(233, 30, 99, 0.1)' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function initMap() {
+        googleMap = new google.maps.Map(document.getElementById("map"), { center: { lat: 35.6895, lng: 139.6917 }, zoom: 12, mapTypeControl: false, streetViewControl: false, fullscreenControl: false });
+        const input = document.getElementById('item-location');
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', googleMap);
+    }
+
     function renderDayTabs() {
         const t = myTrips.find(x => x.id === currentTripId);
-        const start = new Date(t.startDate);
-        const end = new Date(t.endDate);
+        const start = new Date(t.startDate), end = new Date(t.endDate);
         const days = Math.ceil((end - start) / 86400000) + 1;
-        let h = ''; 
-        for(let i=1; i<=days; i++) {
+        let h = ''; for(let i=1; i<=days; i++) {
             const curr = new Date(start); curr.setDate(start.getDate() + (i-1));
-            const dateStr = `${curr.getMonth()+1}/${curr.getDate()}`;
-            h += `<div class="day-tab ${i===currentDay?'active':''}" onclick="currentDay=${i};renderDayTabs();renderItinerary();"><div class="tab-date">${dateStr}</div><div class="tab-name">第 ${i} 天</div></div>`;
+            h += `<div class="day-tab ${i===currentDay?'active':''}" onclick="currentDay=${i};renderDayTabs();renderItinerary();"><div class="tab-date">${curr.getMonth()+1}/${curr.getDate()}</div><div class="tab-name">第 ${i} 天</div></div>`;
         }
         document.getElementById('day-tabs').innerHTML = h;
     }
 
-    async function updateMapMarkers(items) {
-        markers.forEach(m => m.setMap(null)); markers = [];
-        if (polyline) polyline.setMap(null);
-        
-        const geocoder = new google.maps.Geocoder();
-        const path = [];
-        const bounds = new google.maps.LatLngBounds();
-
-        for (const item of items) {
-            if (item.location) {
-                try {
-                    const res = await new Promise((resolve, reject) => {
-                        geocoder.geocode({ address: item.location }, (results, status) => {
-                            if (status === "OK") resolve(results[0].geometry.location);
-                            else reject(status);
-                        });
-                    });
-                    const marker = new google.maps.Marker({
-                        position: res,
-                        map: googleMap,
-                        label: String(markers.length + 1),
-                        title: item.name
-                    });
-                    markers.push(marker);
-                    path.push(res);
-                    bounds.extend(res);
-                } catch(e) {}
-            }
-        }
-
-        if (path.length > 1) {
-            polyline = new google.maps.Polyline({
-                path: path,
-                geodesic: true,
-                strokeColor: "#e91e63",
-                strokeOpacity: 0.8,
-                strokeWeight: 3,
-                map: googleMap
-            });
-        }
-        if (path.length > 0) googleMap.fitBounds(bounds);
-    }
-
     function calculateDuration(start, end) {
-        let [sH, sM] = start.split(':').map(Number);
-        let [eH, eM] = end.split(':').map(Number);
-        let diff = (eH * 60 + eM) - (sH * 60 + sM);
-        if (diff < 0) diff += 1440;
+        let [sH, sM] = start.split(':').map(Number), [eH, eM] = end.split(':').map(Number);
+        let diff = (eH * 60 + eM) - (sH * 60 + sM); if (diff < 0) diff += 1440;
         let h = Math.floor(diff / 60), m = diff % 60;
         return (h > 0 ? h + '小時' : '') + (m > 0 ? m + '分' : '');
     }
@@ -282,31 +229,27 @@
     function renderItinerary() {
         const trip = myTrips.find(x=>x.id===currentTripId);
         const items = (trip.items || []).filter(x=>x.day===currentDay).sort((a,b)=>a.time.localeCompare(b.time));
-        let h = '';
-        items.forEach((item) => {
+        document.getElementById('itinerary-list').innerHTML = items.length ? items.map((item) => {
             const dur = item.endTime ? calculateDuration(item.time, item.endTime) : '';
-            h += `<div class="item-wrapper" onclick="editItem(${item.id})">
-                    <div class="item-card">
-                        <div class="item-left">
-                            <div class="item-time-top">${item.time}</div>
-                            <div class="item-icon-circle">📍</div>
-                            <div class="item-time-bottom">${item.endTime || '--'}</div>
-                        </div>
-                        <div class="item-main">
-                            <div class="item-title">${item.name}</div>
-                            <div class="item-subtitle">${item.subtitle || ''}</div>
-                            <small class="item-location-text">${item.location || ''}</small>
-                            <div class="item-footer">
-                                ${item.location ? `<div class="badge badge-map" onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}')">🗺️ 地圖</div>` : ''}
-                                ${item.remark ? `<div class="badge">📝 備註</div>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    ${dur ? `<div class="stay-time">⏳ 停留 ${dur}</div>` : ''}
-                </div>`;
-        });
-        document.getElementById('itinerary-list').innerHTML = h || '<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程</p>';
+            return `<div class="item-wrapper" onclick="editItem(${item.id})"><div class="item-card"><div class="item-left"><div class="item-time-top">${item.time}</div><div class="item-icon-circle">📍</div><div class="item-time-bottom">${item.endTime || '--'}</div></div><div class="item-main"><div class="item-title">${item.name}</div><div style="font-size:0.8em;color:#888;">${item.subtitle||''}</div><small style="color:#999;font-size:0.7em;">${item.location||''}</small><div style="margin-top:8px;">${item.location?`<span class="badge badge-map" onclick="event.stopPropagation();window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('${item.location}'))">🗺️ 地圖</span>`:''}${item.remark?`<span class="badge">📝 備註</span>`:''}</div></div></div>${dur?`<div class="stay-time">⏳ 停留 ${dur}</div>`:''}</div>`;
+        }).join('') : '<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程</p>';
         updateMapMarkers(items);
+    }
+
+    async function updateMapMarkers(items) {
+        markers.forEach(m => m.setMap(null)); markers = []; if (polyline) polyline.setMap(null);
+        const geocoder = new google.maps.Geocoder(), path = [], bounds = new google.maps.LatLngBounds();
+        for (const item of items) {
+            if (item.location) {
+                try {
+                    const res = await new Promise((rs, rj) => geocoder.geocode({ address: item.location }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s)));
+                    markers.push(new google.maps.Marker({ position: res, map: googleMap, label: String(markers.length + 1) }));
+                    path.push(res); bounds.extend(res);
+                } catch(e) {}
+            }
+        }
+        if (path.length > 1) polyline = new google.maps.Polyline({ path: path, strokeColor: "#e91e63", map: googleMap });
+        if (path.length > 0) googleMap.fitBounds(bounds);
     }
 
     function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
@@ -318,87 +261,26 @@
         myTrips.push(nt); syncToCloud(); renderTripList(); closeTripModal(); showTrip(nt.id);
     }
     
-    let isFlightMode = false;
-    let editingItemId = null;
-
-    function toggleFlightMode() {
-        if (editingItemId) return; // 編輯模式下禁止切換
-        isFlightMode = !isFlightMode;
-        document.getElementById('normal-fields').style.display = isFlightMode ? 'none' : 'block';
-        document.getElementById('flight-fields').style.display = isFlightMode ? 'block' : 'none';
-        document.getElementById('flight-mode-btn').innerText = isFlightMode ? '📝 普通模式' : '✈️ 航班模式';
+    let isFlightMode = false, editingItemId = null;
+    function toggleFlightMode() { isFlightMode = !isFlightMode; document.getElementById('normal-fields').style.display = isFlightMode ? 'none' : 'block'; document.getElementById('flight-fields').style.display = isFlightMode ? 'block' : 'none'; document.getElementById('flight-mode-btn').innerText = isFlightMode ? '📝 普通' : '✈️ 航班'; }
+    function openItemModal() { editingItemId = null; document.getElementById('delete-item-btn').style.display = 'none'; document.getElementById('item-modal').classList.add('active'); }
+    function closeItemModal() { document.getElementById('item-modal').classList.remove('active'); document.getElementById('item-name').value = ''; document.getElementById('item-location').value = ''; document.getElementById('item-sub').value = ''; }
+    function editItem(id) {
+        editingItemId = id; const item = myTrips.find(x => x.id === currentTripId).items.find(x => x.id === id);
+        document.getElementById('item-time').value = item.time; document.getElementById('item-time-end').value = item.endTime || ''; document.getElementById('item-name').value = item.name; document.getElementById('item-sub').value = item.subtitle || ''; document.getElementById('item-location').value = item.location || ''; document.getElementById('item-remark').value = item.remark || '';
+        document.getElementById('normal-fields').style.display = 'block'; document.getElementById('flight-fields').style.display = 'none'; document.getElementById('delete-item-btn').style.display = 'block'; document.getElementById('item-modal').classList.add('active');
     }
-
-    function openItemModal() { 
-        editingItemId = null;
-        document.getElementById('item-modal-title').innerText = '新增活動';
-        document.getElementById('delete-item-btn').style.display = 'none';
-        document.getElementById('flight-mode-btn').style.display = 'block';
-        document.getElementById('item-modal').classList.add('active'); 
-    }
-
-    function editItem(itemId) {
-        editingItemId = itemId;
-        const trip = myTrips.find(x => x.id === currentTripId);
-        const item = trip.items.find(x => x.id === itemId);
-        
-        document.getElementById('item-modal-title').innerText = '修改活動';
-        document.getElementById('item-time').value = item.time;
-        document.getElementById('item-time-end').value = item.endTime || '';
-        document.getElementById('item-name').value = item.name;
-        document.getElementById('item-sub').value = item.subtitle || '';
-        document.getElementById('item-location').value = item.location || '';
-        document.getElementById('item-remark').value = item.remark || '';
-        
-        document.getElementById('normal-fields').style.display = 'block';
-        document.getElementById('flight-fields').style.display = 'none';
-        document.getElementById('flight-mode-btn').style.display = 'none';
-        document.getElementById('delete-item-btn').style.display = 'block';
-        
-        document.getElementById('item-modal').classList.add('active');
-    }
-
-    function deleteItem() {
-        if (!confirm('確定要刪除這個行程嗎？')) return;
-        const trip = myTrips.find(x => x.id === currentTripId);
-        trip.items = trip.items.filter(x => x.id !== editingItemId);
-        syncToCloud(); renderItinerary(); closeItemModal();
-    }
-
-    function closeItemModal() { 
-        document.getElementById('item-modal').classList.remove('active'); 
-        // 重設 Form
-        document.getElementById('item-name').value = ''; 
-        document.getElementById('item-sub').value = ''; 
-        document.getElementById('item-location').value = '';
-        document.getElementById('item-remark').value = '';
-    }
-
+    function deleteItem() { if (confirm('刪除？')) { const t = myTrips.find(x => x.id === currentTripId); t.items = t.items.filter(x => x.id !== editingItemId); syncToCloud(); renderItinerary(); closeItemModal(); } }
     function saveItem() {
         const trip = myTrips.find(x=>x.id===currentTripId); if(!trip.items) trip.items = [];
-        
         if (editingItemId) {
             const idx = trip.items.findIndex(x => x.id === editingItemId);
-            trip.items[idx] = {
-                ...trip.items[idx],
-                time: document.getElementById('item-time').value,
-                endTime: document.getElementById('item-time-end').value,
-                name: document.getElementById('item-name').value,
-                subtitle: document.getElementById('item-sub').value,
-                location: document.getElementById('item-location').value,
-                remark: document.getElementById('item-remark').value
-            };
+            trip.items[idx] = { ...trip.items[idx], time: document.getElementById('item-time').value, endTime: document.getElementById('item-time-end').value, name: document.getElementById('item-name').value, subtitle: document.getElementById('item-sub').value, location: document.getElementById('item-location').value, remark: document.getElementById('item-remark').value };
         } else if (isFlightMode) {
-            // ... (原本的航班模式 logic)
-            const fTime = document.getElementById('flight-time').value;
-            const airline = document.getElementById('flight-airline').value;
-            const fNo = document.getElementById('flight-no').value;
-            const duration = document.getElementById('flight-duration').value;
-            let [h, m] = fTime.split(':').map(Number);
-            let checkInH = (h - 2 + 24) % 24;
-            const checkInTime = `${String(checkInH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            const fTime = document.getElementById('flight-time').value, airline = document.getElementById('flight-airline').value, fNo = document.getElementById('flight-no').value, dur = document.getElementById('flight-duration').value;
+            let [h, m] = fTime.split(':').map(Number), checkInTime = `${String((h-2+24)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
             trip.items.push({ id: Date.now(), day: currentDay, time: checkInTime, endTime: fTime, name: "🚀 抵達機場辦理登機 & 報到", subtitle: "建議提前2小時到達", location: "", remark: "" });
-            trip.items.push({ id: Date.now() + 1, day: currentDay, time: fTime, endTime: "", name: `✈️ ${airline} ${fNo}`, subtitle: `預計飛行時間: ${duration}`, location: "", remark: "" });
+            trip.items.push({ id: Date.now()+1, day: currentDay, time: fTime, endTime: "", name: `✈️ ${airline} ${fNo}`, subtitle: `預計飛行時間: ${dur}`, location: "", remark: "" });
             toggleFlightMode();
         } else {
             trip.items.push({ id:Date.now(), day:currentDay, time:document.getElementById('item-time').value, endTime:document.getElementById('item-time-end').value, name:document.getElementById('item-name').value, subtitle:document.getElementById('item-sub').value, location:document.getElementById('item-location').value, remark:document.getElementById('item-remark').value });
