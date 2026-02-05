@@ -147,10 +147,11 @@
         <div class="form-row"><label>備註</label><textarea id="item-remark" rows="2"></textarea></div>
     </div>
     <div id="flight-fields" style="display:none;">
-        <div class="form-row"><label>起飛時間</label><input type="time" id="flight-time" value="09:00"></div>
+        <div class="form-row"><label>起飛時間 (當地)</label><input type="time" id="flight-time" value="09:00"></div>
+        <div class="form-row"><label>抵達時間 (當地)</label><input type="time" id="flight-arrival-time" value="13:30"></div>
         <div class="form-row"><label>航空公司</label><input type="text" id="flight-airline"></div>
         <div class="form-row"><label>航班編號</label><input type="text" id="flight-no"></div>
-        <div class="form-row"><label>飛行時間</label><input type="text" id="flight-duration"></div>
+        <div class="form-row"><label>行李/選項 (Luggage)</label><input type="text" id="flight-luggage" placeholder="例如：20kg, Essential"></div>
     </div>
     <div class="modal-footer"><button style="background:#eee;" onclick="closeItemModal()">取消</button><button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button></div>
     <button id="delete-item-btn" style="display:none; width:100%; background:#ff5252; color:white; border:none; padding:12px; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;" onclick="deleteItem()">🗑️ 刪除此行程</button>
@@ -304,6 +305,28 @@
     function showDataModal() { document.getElementById('data-modal').classList.add('active'); loadPriceChart(); }
     async function loadPriceChart() {
         const resp = await fetch('data.json?t=' + Date.now()), data = await resp.json(), ctx = document.getElementById('priceChart').getContext('2d');
+        const latest = data[data.length - 1];
+        
+        // 更新彈窗內的詳細資料
+        let detailsHtml = `<div style="font-size:0.85em; background:#f0f2f5; padding:10px; border-radius:10px; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>✈️ UO686 (7/18)</span>
+                <span style="font-weight:bold;">HK$ ${latest.uo686}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>✈️ UO899 (7/26)</span>
+                <span style="font-weight:bold;">HK$ ${latest.uo899}</span>
+            </div>
+            <div style="font-size:0.8em; color:#666; border-top:1px solid #ddd; padding-top:5px; margin-top:5px;">
+                選項：Essential (去) / Max (回) | 含行李
+            </div>
+        </div>`;
+        
+        const modalContent = document.querySelector('#data-modal .modal-content');
+        const existingDetails = modalContent.querySelector('.price-details');
+        if(existingDetails) existingDetails.innerHTML = detailsHtml;
+        else modalContent.insertAdjacentHTML('afterbegin', `<div class="price-details">${detailsHtml}</div>`);
+
         if(chartInstance) chartInstance.destroy();
         chartInstance = new Chart(ctx, { type: 'line', data: { labels: data.map(d => d.date.split(' ')[0]), datasets: [{ label: '總價 (HKD)', data: data.map(d => d.total), borderColor: '#e91e63', tension: 0.3, fill: true, backgroundColor: 'rgba(233, 30, 99, 0.1)' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
@@ -331,9 +354,13 @@
         const trip = myTrips.find(x=>x.id===currentTripId); if(!trip.items) trip.items = [];
         if (editingItemId) { const idx = trip.items.findIndex(x => x.id === editingItemId); trip.items[idx] = { ...trip.items[idx], time: document.getElementById('item-time').value, endTime: document.getElementById('item-time-end').value, name: document.getElementById('item-name').value, subtitle: document.getElementById('item-sub').value, location: document.getElementById('item-location').value, remark: document.getElementById('item-remark').value }; }
         else if (isFlightMode) {
-            const fTime = document.getElementById('flight-time').value, airline = document.getElementById('flight-airline').value, fNo = document.getElementById('flight-no').value, dur = document.getElementById('flight-duration').value, [h, m] = fTime.split(':').map(Number), checkInTime = `${String((h-2+24)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const fTime = document.getElementById('flight-time').value, airline = document.getElementById('flight-airline').value, fNo = document.getElementById('flight-no').value, arrivalTime = document.getElementById('flight-arrival-time').value, luggage = document.getElementById('flight-luggage').value;
+            
+            // 計算報到時間 (起飛前 2 小時)
+            let [h, m] = fTime.split(':').map(Number), checkInTime = `${String((h-2+24)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            
             trip.items.push({ id: Date.now(), day: currentDay, time: checkInTime, endTime: fTime, name: "🚀 抵達機場辦理登機 & 報到", subtitle: "建議提前2小時到達", location: "", remark: "" });
-            trip.items.push({ id: Date.now()+1, day: currentDay, time: fTime, endTime: "", name: `✈️ ${airline} ${fNo}`, subtitle: `預計飛行時間: ${dur}`, location: "", remark: "" });
+            trip.items.push({ id: Date.now()+1, day: currentDay, time: fTime, endTime: arrivalTime, name: `✈️ ${airline} ${fNo}`, subtitle: `選項: ${luggage}`, location: "", remark: "注意：抵達時間為當地時間" });
             toggleFlightMode();
         } else { trip.items.push({ id:Date.now(), day:currentDay, time:document.getElementById('item-time').value, endTime:document.getElementById('item-time-end').value, name:document.getElementById('item-name').value, subtitle:document.getElementById('item-sub').value, location:document.getElementById('item-location').value, remark:document.getElementById('item-remark').value }); }
         syncToCloud(); renderItinerary(); closeItemModal();
