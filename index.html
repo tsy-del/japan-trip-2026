@@ -251,7 +251,14 @@
     }
 
     function showHome() { location.reload(); }
-    function deleteEntireTrip() { if(confirm('確定永久刪除整個旅行？')) { myTrips = myTrips.filter(t => t.id !== currentTripId); syncToCloud(); showHome(); } }
+    function deleteEntireTrip() {
+        if(confirm('確定永久刪除整個旅行？')) {
+            myTrips = myTrips.filter(t => t.id !== currentTripId);
+            syncToCloud().then(() => {
+                showHome();
+            });
+        }
+    }
 
     function initMap() {
         googleMap = new google.maps.Map(document.getElementById("map"), { center: { lat: 35.6895, lng: 139.6917 }, zoom: 12, mapTypeControl: false, streetViewControl: false, fullscreenControl: false });
