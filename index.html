@@ -82,12 +82,13 @@
     <button onclick="handleLogin()">登入並同步</button>
 </div>
 
-<header>
-    <div class="back-btn" id="btn-back" onclick="showHome()" style="display:none;">❮</div>
-    <button id="data-btn" onclick="showDataModal()">📊 數據</button>
-    <h1 id="header-title">我的行程</h1>
-    <span id="display-user" class="user-tag" onclick="handleLogout()">未登入</span>
-</header>
+    <header>
+        <div class="back-btn" id="btn-back" onclick="showHome()" style="display:none;">❮</div>
+        <button id="data-btn" onclick="showDataModal()">📊 數據</button>
+        <button id="delete-trip-btn" onclick="deleteEntireTrip()" style="display:none; background:none; border:none; color:#ff5252; font-size:1.1em; cursor:pointer; position:absolute; left:50px; top:15px;">🗑️</button>
+        <h1 id="header-title">我的行程</h1>
+        <span id="display-user" class="user-tag" onclick="handleLogout()">未登入</span>
+    </header>
 
 <div class="container">
     <div id="view-home">
@@ -147,12 +148,19 @@
 
 <!-- Modal: Hotel Editor -->
 <div id="hotel-modal" class="modal"><div class="modal-content">
-    <h3>🏨 設定今日住宿</h3>
+    <h3>🏨 設定住宿</h3>
     <div class="form-row"><label>酒店名稱</label><input type="text" id="hotel-name-input" placeholder="例如：東京希爾頓酒店"></div>
-    <div class="form-row"><label>地址 (用於地圖標記)</label><input type="text" id="hotel-addr-input" placeholder="輸入地址或酒店名"></div>
+    <div class="form-row"><label>地址</label><input type="text" id="hotel-addr-input" placeholder="輸入地址或酒店名"></div>
+    <div class="form-row" style="background:#f0f8ff; padding:10px; border-radius:8px;">
+        <label style="color:#2196f3; font-weight:bold;">同步設定</label>
+        <div style="display:flex; align-items:center; gap:10px; font-size:0.9em; margin-top:5px;">
+            <input type="checkbox" id="sync-future-days" style="width:20px; margin:0;">
+            <span>同時應用到此後的每一天</span>
+        </div>
+    </div>
     <div class="modal-footer">
         <button style="background:#eee;" onclick="document.getElementById('hotel-modal').classList.remove('active')">取消</button>
-        <button style="background:#2196f3; color:white;" onclick="saveHotel()">儲存酒店</button>
+        <button style="background:#2196f3; color:white;" onclick="saveHotel()">儲存</button>
     </div>
 </div></div>
 
@@ -202,6 +210,7 @@
         document.getElementById('view-home').classList.remove('active');
         document.getElementById('view-detail').classList.add('active');
         document.getElementById('btn-back').style.display = 'block';
+        document.getElementById('delete-trip-btn').style.display = 'block';
         document.getElementById('header-title').innerText = t.title;
         document.getElementById('data-btn').style.display = (tid === 'osaka-2026' || t.title.includes('大阪')) ? 'block' : 'none';
         if (!googleMap) initMap();
@@ -322,12 +331,26 @@
     function saveHotel() {
         const trip = myTrips.find(x => x.id === currentTripId);
         if (!trip.hotels) trip.hotels = {};
-        trip.hotels[currentDay] = {
+        
+        const hotelData = {
             name: document.getElementById('hotel-name-input').value,
             address: document.getElementById('hotel-addr-input').value
         };
+
+        trip.hotels[currentDay] = hotelData;
+
+        // 如果勾選了「應用到後續日子」
+        if (document.getElementById('sync-future-days').checked) {
+            const start = new Date(trip.startDate), end = new Date(trip.endDate);
+            const totalDays = Math.ceil((end - start) / 86400000) + 1;
+            for (let i = currentDay + 1; i <= totalDays; i++) {
+                trip.hotels[i] = { ...hotelData };
+            }
+        }
+
         syncToCloud(); renderItinerary();
         document.getElementById('hotel-modal').classList.remove('active');
+        document.getElementById('sync-future-days').checked = false; // Reset
     }
 
     function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
@@ -366,6 +389,13 @@
         syncToCloud(); renderItinerary(); closeItemModal();
     }
     function showHome() { location.reload(); }
+
+    function deleteEntireTrip() {
+        if(!confirm('確定要永久刪除整個旅行行程嗎？此操作無法還原。')) return;
+        myTrips = myTrips.filter(t => t.id !== currentTripId);
+        syncToCloud();
+        showHome();
+    }
 </script>
 </body>
 </html>
