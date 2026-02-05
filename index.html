@@ -27,6 +27,13 @@
         #view-detail { display: none; }
         #view-detail.active { display: block; }
 
+        /* 今日酒店樣式 */
+        .hotel-bar { background: #e3f2fd; border-radius: 12px; padding: 12px 15px; margin: 0 15px 15px 15px; display: flex; align-items: center; gap: 12px; border: 1px dashed #2196f3; cursor: pointer; }
+        .hotel-icon { font-size: 1.4em; }
+        .hotel-info { flex: 1; }
+        .hotel-title { font-weight: bold; font-size: 0.9em; color: #1976d2; }
+        .hotel-addr { font-size: 0.75em; color: #64b5f6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+
         #map-container { width: 100%; height: 250px; background: #eee; position: relative; }
         #map { width: 100%; height: 100%; }
 
@@ -90,6 +97,15 @@
     <div id="view-detail">
         <div id="map-container"><div id="map"></div></div>
         <div class="day-tabs" id="day-tabs"></div>
+        <!-- 今日住宿置頂 -->
+        <div id="hotel-bar" class="hotel-bar" onclick="openHotelModal()">
+            <div class="hotel-icon">🏨</div>
+            <div class="hotel-info">
+                <div id="hotel-name-display" class="hotel-title">尚未設定今日住宿</div>
+                <div id="hotel-addr-display" class="hotel-addr">點擊在此設定酒店及地址</div>
+            </div>
+            <div style="color: #2196f3; font-size: 0.8em;">編輯 ❯</div>
+        </div>
         <div id="itinerary-list"></div>
         <button class="fab" onclick="openItemModal()">+</button>
     </div>
@@ -127,6 +143,17 @@
     </div>
     <div class="modal-footer"><button style="background:#eee;" onclick="closeItemModal()">取消</button><button style="background:var(--primary);color:white;" onclick="saveItem()">儲存</button></div>
     <button id="delete-item-btn" style="display:none; width:100%; background:#ff5252; color:white; border:none; padding:12px; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;" onclick="deleteItem()">🗑️ 刪除此行程</button>
+</div></div>
+
+<!-- Modal: Hotel Editor -->
+<div id="hotel-modal" class="modal"><div class="modal-content">
+    <h3>🏨 設定今日住宿</h3>
+    <div class="form-row"><label>酒店名稱</label><input type="text" id="hotel-name-input" placeholder="例如：東京希爾頓酒店"></div>
+    <div class="form-row"><label>地址 (用於地圖標記)</label><input type="text" id="hotel-addr-input" placeholder="輸入地址或酒店名"></div>
+    <div class="modal-footer">
+        <button style="background:#eee;" onclick="document.getElementById('hotel-modal').classList.remove('active')">取消</button>
+        <button style="background:#2196f3; color:white;" onclick="saveHotel()">儲存酒店</button>
+    </div>
 </div></div>
 
 <script>
@@ -229,27 +256,78 @@
     function renderItinerary() {
         const trip = myTrips.find(x=>x.id===currentTripId);
         const items = (trip.items || []).filter(x=>x.day===currentDay).sort((a,b)=>a.time.localeCompare(b.time));
+        
+        // 更新酒店置頂顯示
+        if (!trip.hotels) trip.hotels = {};
+        const todayHotel = trip.hotels[currentDay];
+        if (todayHotel) {
+            document.getElementById('hotel-name-display').innerText = todayHotel.name;
+            document.getElementById('hotel-addr-display').innerText = todayHotel.address;
+        } else {
+            document.getElementById('hotel-name-display').innerText = '尚未設定今日住宿';
+            document.getElementById('hotel-addr-display').innerText = '點擊在此設定酒店及地址';
+        }
+
         document.getElementById('itinerary-list').innerHTML = items.length ? items.map((item) => {
             const dur = item.endTime ? calculateDuration(item.time, item.endTime) : '';
             return `<div class="item-wrapper" onclick="editItem(${item.id})"><div class="item-card"><div class="item-left"><div class="item-time-top">${item.time}</div><div class="item-icon-circle">📍</div><div class="item-time-bottom">${item.endTime || '--'}</div></div><div class="item-main"><div class="item-title">${item.name}</div><div style="font-size:0.8em;color:#888;">${item.subtitle||''}</div><small style="color:#999;font-size:0.7em;">${item.location||''}</small><div style="margin-top:8px;">${item.location?`<span class="badge badge-map" onclick="event.stopPropagation();window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('${item.location}'))">🗺️ 地圖</span>`:''}${item.remark?`<span class="badge">📝 備註</span>`:''}</div></div></div>${dur?`<div class="stay-time">⏳ 停留 ${dur}</div>`:''}</div>`;
         }).join('') : '<p style="text-align:center;color:#999;padding:40px;">這天還沒有行程</p>';
-        updateMapMarkers(items);
+        updateMapMarkers(items, todayHotel);
     }
 
-    async function updateMapMarkers(items) {
+    async function updateMapMarkers(items, hotel) {
         markers.forEach(m => m.setMap(null)); markers = []; if (polyline) polyline.setMap(null);
         const geocoder = new google.maps.Geocoder(), path = [], bounds = new google.maps.LatLngBounds();
+        
+        // 標記酒店 (特殊標記)
+        if (hotel && hotel.address) {
+            try {
+                const res = await new Promise((rs, rj) => geocoder.geocode({ address: hotel.address }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s)));
+                const hotelMarker = new google.maps.Marker({
+                    position: res, map: googleMap,
+                    icon: { url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png" },
+                    title: "🏨 " + hotel.name
+                });
+                markers.push(hotelMarker);
+                bounds.extend(res);
+            } catch(e) {}
+        }
+
         for (const item of items) {
             if (item.location) {
                 try {
                     const res = await new Promise((rs, rj) => geocoder.geocode({ address: item.location }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s)));
-                    markers.push(new google.maps.Marker({ position: res, map: googleMap, label: String(markers.length + 1) }));
+                    markers.push(new google.maps.Marker({ position: res, map: googleMap, label: String(markers.length) }));
                     path.push(res); bounds.extend(res);
                 } catch(e) {}
             }
         }
         if (path.length > 1) polyline = new google.maps.Polyline({ path: path, strokeColor: "#e91e63", map: googleMap });
-        if (path.length > 0) googleMap.fitBounds(bounds);
+        if (bounds.isEmpty() === false) googleMap.fitBounds(bounds);
+    }
+
+    function openHotelModal() {
+        const trip = myTrips.find(x => x.id === currentTripId);
+        const hotel = (trip.hotels || {})[currentDay] || { name: '', address: '' };
+        document.getElementById('hotel-name-input').value = hotel.name;
+        document.getElementById('hotel-addr-input').value = hotel.address;
+        document.getElementById('hotel-modal').classList.add('active');
+        
+        // 為酒店地址輸入框加入自動補完
+        const hotelInput = document.getElementById('hotel-addr-input');
+        const hotelAutocomplete = new google.maps.places.Autocomplete(hotelInput);
+        hotelAutocomplete.bindTo('bounds', googleMap);
+    }
+
+    function saveHotel() {
+        const trip = myTrips.find(x => x.id === currentTripId);
+        if (!trip.hotels) trip.hotels = {};
+        trip.hotels[currentDay] = {
+            name: document.getElementById('hotel-name-input').value,
+            address: document.getElementById('hotel-addr-input').value
+        };
+        syncToCloud(); renderItinerary();
+        document.getElementById('hotel-modal').classList.remove('active');
     }
 
     function openTripModal() { document.getElementById('trip-modal').classList.add('active'); }
