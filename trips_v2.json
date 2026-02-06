@@ -104,6 +104,13 @@
         "name": "Mtr",
         "amount": 5000,
         "paidBy": "Joann"
+      },
+      {
+        "id": 1770345154778,
+        "day": 2,
+        "name": "breakfast",
+        "amount": 18000,
+        "paidBy": "Chun"
       }
     ]
   },
@@ -112,18 +119,7 @@
     "title": "台灣",
     "startDate": "2026-03-13",
     "endDate": "2026-03-15",
-    "items": [
-      {
-        "id": 1770342229628,
-        "day": 1,
-        "time": "10:00",
-        "endTime": "11:43",
-        "name": "台北車站",
-        "subtitle": "",
-        "location": "",
-        "remark": ""
-      }
-    ],
+    "items": [],
     "expenses": [],
     "mates": [
       "SY",
