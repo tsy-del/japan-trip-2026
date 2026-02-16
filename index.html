@@ -20,13 +20,13 @@
         
         .header-right { display: flex; align-items: center; gap: 6px; }
         .user-tag { font-size: 0.7em; background: #eee; padding: 3px 8px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
-        #data-btn, #notes-btn { display: none; font-size: 0.7em; background: var(--secondary); color: white; border: none; padding: 4px 8px; border-radius: 12px; cursor: pointer; white-space: nowrap; }
+        #data-btn, #notes-btn, #checklist-btn { display: none; font-size: 0.7em; background: var(--secondary); color: white; border: none; padding: 4px 8px; border-radius: 12px; cursor: pointer; white-space: nowrap; }
         #delete-trip-btn { display: none; background: none; border: none; color: #ff5252; font-size: 1.1em; cursor: pointer; padding: 0 5px; }
         #mates-btn { display: none; font-size: 0.7em; background: rgba(233, 30, 99, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 3px 8px; border-radius: 12px; cursor: pointer; white-space: nowrap; font-weight: bold; }
 
         .container { max-width: 600px; margin: 0 auto; }
-        #view-home, #view-detail, #view-notes { display: none; padding: 15px; }
-        #view-home.active, #view-detail.active, #view-notes.active { display: block; }
+        #view-home, #view-detail, #view-notes, #view-checklist { display: none; padding: 15px; }
+        #view-home.active, #view-detail.active, #view-notes.active, #view-checklist.active { display: block; }
         
         .trip-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
 
@@ -83,6 +83,13 @@
         .form-row input, .form-row textarea, .form-row select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
         .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
         .modal-footer button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+
+        /* Checklist Styles */
+        .check-item { display: flex; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #eee; }
+        .check-item input[type="checkbox"] { width: 22px; height: 22px; margin-right: 12px; accent-color: var(--primary); }
+        .check-item span { flex: 1; font-size: 1em; }
+        .check-item.done span { text-decoration: line-through; color: #999; }
+        .check-del { color: #ff5252; padding: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -99,6 +106,7 @@
     <div class="back-btn" id="btn-back" onclick="showHome()" style="display:none;">❮</div>
     <h1 id="header-title">我的行程</h1>
     <div class="header-right">
+        <button id="checklist-btn" onclick="showChecklistView()">✅ 清單</button>
         <button id="notes-btn" onclick="showNotesView()">📝 備忘</button>
         <button id="mates-btn" onclick="openMatesModal()">👥 旅伴</button>
         <button id="data-btn" onclick="showDataModal()">📊 數據</button>
@@ -142,6 +150,15 @@
         <textarea id="notes-content" style="width:100%; height:75vh; padding:15px; border-radius:12px; border:1px solid #ddd; box-sizing:border-box; font-family:inherit; font-size:1em;" placeholder="喺度輸入呢個行程嘅筆記..."></textarea>
         <button onclick="saveNotes()" style="width:100%; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; margin-top:15px;">💾 儲存備忘錄</button>
     </div>
+
+    <!-- Checklist View -->
+    <div id="view-checklist">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="new-check-item" style="flex:1; padding:12px; border-radius:10px; border:1px solid #ddd;" placeholder="新增物品 (例如：充電器)">
+            <button onclick="addCheckItem()" style="background:var(--secondary); color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">➕</button>
+        </div>
+        <div id="checklist-items"></div>
+    </div>
 </div>
 
 <div class="actions-fab" id="trip-actions" style="display:none;">
@@ -149,7 +166,7 @@
     <div class="fab-group"><span class="fab-label">新增活動</span><button class="fab-btn fab-event" onclick="openItemModal()">📍</button></div>
 </div>
 
-<!-- Modals -->
+<!-- Modals (保持不變) -->
 <div id="expense-modal" class="modal"><div class="modal-content">
     <h3>💰 記錄開支</h3>
     <div class="form-row"><label>項目名稱</label><input type="text" id="exp-name"></div>
@@ -225,11 +242,13 @@
         document.getElementById('view-home').classList.remove('active'); 
         document.getElementById('view-detail').classList.add('active');
         document.getElementById('view-notes').classList.remove('active');
+        document.getElementById('view-checklist').classList.remove('active');
         document.getElementById('trip-actions').style.display = 'flex'; 
         document.getElementById('btn-back').style.display = 'block';
         document.getElementById('delete-trip-btn').style.display = 'block'; 
         document.getElementById('mates-btn').style.display = 'block';
         document.getElementById('notes-btn').style.display = 'block';
+        document.getElementById('checklist-btn').style.display = 'block';
         document.getElementById('header-title').innerText = t.title;
         document.getElementById('data-btn').style.display = (tid === 'osaka-2026' || t.title.includes('大阪')) ? 'block' : 'none';
         updatePaidByDropdown(); if (!googleMap) initMap(); renderDayTabs(); renderCombinedList();
@@ -240,11 +259,13 @@
         document.getElementById('view-home').classList.add('active'); 
         document.getElementById('view-detail').classList.remove('active');
         document.getElementById('view-notes').classList.remove('active');
+        document.getElementById('view-checklist').classList.remove('active');
         document.getElementById('trip-actions').style.display = 'none'; 
         document.getElementById('btn-back').style.display = 'none';
         document.getElementById('delete-trip-btn').style.display = 'none'; 
         document.getElementById('mates-btn').style.display = 'none';
         document.getElementById('notes-btn').style.display = 'none';
+        document.getElementById('checklist-btn').style.display = 'none';
         document.getElementById('data-btn').style.display = 'none';
         document.getElementById('header-title').innerText = '我的行程';
         renderTripList();
@@ -253,6 +274,7 @@
     function showNotesView() {
         const t = myTrips.find(x => x.id === currentTripId);
         document.getElementById('view-detail').classList.remove('active');
+        document.getElementById('view-checklist').classList.remove('active');
         document.getElementById('view-notes').classList.add('active');
         document.getElementById('notes-content').value = t.notes || '';
         document.getElementById('header-title').innerText = `${t.title} - 備忘錄`;
@@ -262,6 +284,53 @@
         const t = myTrips.find(x => x.id === currentTripId);
         t.notes = document.getElementById('notes-content').value;
         syncToCloud().then(() => alert('備忘錄已儲存！'));
+    }
+
+    function showChecklistView() {
+        const t = myTrips.find(x => x.id === currentTripId);
+        document.getElementById('view-detail').classList.remove('active');
+        document.getElementById('view-notes').classList.remove('active');
+        document.getElementById('view-checklist').classList.add('active');
+        document.getElementById('header-title').innerText = `${t.title} - 行李清單`;
+        renderChecklist();
+    }
+
+    function renderChecklist() {
+        const t = myTrips.find(x => x.id === currentTripId);
+        const list = t.checklist || [];
+        document.getElementById('checklist-items').innerHTML = list.map((item, idx) => `
+            <div class="check-item ${item.done ? 'done' : ''}">
+                <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheckItem(${idx})">
+                <span>${item.text}</span>
+                <div class="check-del" onclick="deleteCheckItem(${idx})">🗑️</div>
+            </div>
+        `).join('');
+    }
+
+    function addCheckItem() {
+        const input = document.getElementById('new-check-item');
+        if (!input.value) return;
+        const t = myTrips.find(x => x.id === currentTripId);
+        if (!t.checklist) t.checklist = [];
+        t.checklist.push({ text: input.value, done: false });
+        input.value = '';
+        renderChecklist();
+        syncToCloud();
+    }
+
+    function toggleCheckItem(idx) {
+        const t = myTrips.find(x => x.id === currentTripId);
+        t.checklist[idx].done = !t.checklist[idx].done;
+        renderChecklist();
+        syncToCloud();
+    }
+
+    function deleteCheckItem(idx) {
+        if (!confirm('刪除呢項？')) return;
+        const t = myTrips.find(x => x.id === currentTripId);
+        t.checklist.splice(idx, 1);
+        renderChecklist();
+        syncToCloud();
     }
 
     function initMap() {
