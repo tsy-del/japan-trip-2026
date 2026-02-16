@@ -201,6 +201,10 @@
       {
         "text": "Passport",
         "done": false
+      },
+      {
+        "text": "身份証",
+        "done": false
       }
     ]
   }
