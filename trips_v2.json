@@ -267,6 +267,10 @@
       {
         "text": "尿片",
         "done": false
+      },
+      {
+        "text": "紗巾",
+        "done": false
       }
     ]
   }
