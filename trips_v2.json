@@ -159,6 +159,16 @@
         "subtitle": "選項: ",
         "location": "",
         "remark": "注意：抵達時間為當地時間"
+      },
+      {
+        "id": 1771211601837,
+        "day": 3,
+        "time": "19:00",
+        "endTime": "19:40",
+        "name": "臺灣桃園國際機場",
+        "subtitle": "",
+        "location": "臺灣桃園國際機場",
+        "remark": ""
       }
     ],
     "expenses": [],
