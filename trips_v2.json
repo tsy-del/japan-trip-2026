@@ -227,6 +227,10 @@
       {
         "text": "牙刷",
         "done": false
+      },
+      {
+        "text": "充電器",
+        "done": false
       }
     ]
   }
