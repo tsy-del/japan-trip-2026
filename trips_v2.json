@@ -112,6 +112,16 @@
         "amount": 18000,
         "paidBy": "Chun"
       }
+    ],
+    "checklist": [
+      {
+        "text": "Passport",
+        "done": false
+      },
+      {
+        "text": "身份証",
+        "done": false
+      }
     ]
   },
   {
