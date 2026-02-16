@@ -211,9 +211,9 @@
 <div id="hotel-modal" class="modal"><div class="modal-content"><h3>🏨 設定住宿</h3><div class="form-row"><label>酒店</label><input type="text" id="hotel-name-input"></div><div class="form-row"><label>地址</label><input type="text" id="hotel-addr-input"></div><div id="hotel-day-selector" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div><div class="modal-footer"><button style="background:#eee;" onclick="document.getElementById('hotel-modal').classList.remove('active')">取消</button><button style="background:#2196f3; color:white;" onclick="saveHotel()">儲存</button></div></div></div>
 
 <script>
-    const DATA_REPO = 'tsy-del/japan-trip-2026';
+    const DATA_REPO = 'tsy-del/trip-app';
     let GITHUB_TOKEN = localStorage.getItem('app_token'), currentUser = localStorage.getItem('app_user');
-    let myTrips = [], currentTripId = null, currentDay = 1, googleMap = null, markers = [], polyline = null, chartInstance = null;
+    let myTrips = [], currentTripId = null, currentDay = 1, googleMap = null, markers = [], directionsRenderer = null, chartInstance = null;
 
     function handleLogin() { const n = document.getElementById('user-name').value, t = document.getElementById('access-key').value; if (n && t) { localStorage.setItem('app_user', n); localStorage.setItem('app_token', t); location.reload(); } }
     function handleLogout() { if(confirm('確定登出？')) { localStorage.clear(); location.reload(); } }
@@ -264,6 +264,7 @@
 
     function initMap() {
         googleMap = new google.maps.Map(document.getElementById("map"), { center: { lat: 35.6895, lng: 139.6917 }, zoom: 12, mapTypeControl: false, streetViewControl: false, fullscreenControl: false });
+        directionsRenderer = new google.maps.DirectionsRenderer({ map: googleMap, suppressMarkers: true, polylineOptions: { strokeColor: "#e91e63", strokeOpacity: 0.7, strokeWeight: 5 } });
         const ac = new google.maps.places.Autocomplete(document.getElementById('item-location')); ac.bindTo('bounds', googleMap);
     }
 
@@ -301,11 +302,60 @@
     }
 
     async function updateMapMarkers(items, hotel) {
-        markers.forEach(m => m.setMap(null)); markers = []; if (polyline) polyline.setMap(null);
-        const geocoder = new google.maps.Geocoder(), path = [], bounds = new google.maps.LatLngBounds();
-        if (hotel && hotel.address) { try { const res = await new Promise((rs, rj) => geocoder.geocode({ address: hotel.address }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s))); markers.push(new google.maps.Marker({ position: res, map: googleMap, icon: { url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png" } })); bounds.extend(res); } catch(e) {} }
-        for (const item of items) { if (item.location) { try { const res = await new Promise((rs, rj) => geocoder.geocode({ address: item.location }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s))); markers.push(new google.maps.Marker({ position: res, map: googleMap, label: String(markers.length) })); path.push(res); bounds.extend(res); } catch(e) {} } }
-        if (path.length > 1) polyline = new google.maps.Polyline({ path: path, strokeColor: "#e91e63", map: googleMap });
+        markers.forEach(m => m.setMap(null)); markers = []; 
+        if (directionsRenderer) directionsRenderer.setDirections({ routes: [] });
+        
+        const geocoder = new google.maps.Geocoder(), bounds = new google.maps.LatLngBounds();
+        const locations = [];
+
+        // 處理酒店位置
+        if (hotel && hotel.address) { 
+            try { 
+                const res = await new Promise((rs, rj) => geocoder.geocode({ address: hotel.address }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s))); 
+                markers.push(new google.maps.Marker({ position: res, map: googleMap, icon: { url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png" } })); 
+                bounds.extend(res); 
+            } catch(e) {} 
+        }
+
+        // 處理行程點
+        for (const item of items) { 
+            if (item.location) { 
+                try { 
+                    const res = await new Promise((rs, rj) => geocoder.geocode({ address: item.location }, (r, s) => s === "OK" ? rs(r[0].geometry.location) : rj(s))); 
+                    const marker = new google.maps.Marker({ position: res, map: googleMap, label: String(markers.length) });
+                    markers.push(marker); 
+                    locations.push(res);
+                    bounds.extend(res); 
+                } catch(e) {} 
+            } 
+        }
+
+        // 繪製實際道路路線
+        if (locations.length > 1) {
+            const directionsService = new google.maps.DirectionsService();
+            const waypoints = locations.slice(1, -1).map(loc => ({ location: loc, stopover: true }));
+            
+            directionsService.route({
+                origin: locations[0],
+                destination: locations[locations.length - 1],
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.TRANSIT, 
+            }, (result, status) => {
+                if (status === "OK") {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    directionsService.route({
+                        origin: locations[0],
+                        destination: locations[locations.length - 1],
+                        waypoints: waypoints,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                    }, (res, stat) => {
+                        if (stat === "OK") directionsRenderer.setDirections(res);
+                    });
+                }
+            });
+        }
+
         if (!bounds.isEmpty()) googleMap.fitBounds(bounds);
     }
 
@@ -368,7 +418,6 @@
             list.innerHTML = '<p style="text-align:center; color:#999; font-size:0.8em;">暫無開支記錄</p>';
             return;
         }
-        // 按日期（Day）排序顯示
         const sorted = [...expenses].sort((a,b) => b.id - a.id); 
         list.innerHTML = sorted.map(e => `
             <div class="expense-card" style="padding:10px; margin-bottom:5px; font-size:0.85em;">
