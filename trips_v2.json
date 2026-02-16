@@ -215,6 +215,10 @@
       {
         "text": "身份証",
         "done": false
+      },
+      {
+        "text": "銀包",
+        "done": false
       }
     ]
   }
