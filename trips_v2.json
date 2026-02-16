@@ -196,6 +196,12 @@
         "name": "皇家季節酒店台北館 (Royal Seasons Hotel Taipei-Nanjing W)",
         "address": "南京西路330號, 大同區, 台北市, 台灣, 10345"
       }
-    }
+    },
+    "checklist": [
+      {
+        "text": "Passport",
+        "done": false
+      }
+    ]
   }
 ]
